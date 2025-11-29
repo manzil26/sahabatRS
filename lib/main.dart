@@ -31,19 +31,16 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
+          
+          routes: {
+        '/profile': (context) => const ProfilePage(),
+        '/edit-profile': (context) => const EditProfilePage(),
+        '/simpan-profile': (context) => const SimpanProfilePage(),
+      };
       
       // --- BAGIAN 3: TENTUKAN HALAMAN PERTAMA ---
       // Di sini kita pasang halaman PilihKendaraanPage sebagai halaman utama yang muncul
       home: const PilihKendaraanPage(), 
-    );
-    routes: {
-        '/profile': (context) => const ProfilePage(),
-        '/edit-profile': (context) => const EditProfilePage(),
-        '/simpan-profile': (context) => const SimpanProfilePage(),
-      },
-
-      // halaman awal tetap seperti aslinya
-      home: const PilihKendaraanPage(),
     );
   }
 }
