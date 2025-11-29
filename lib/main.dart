@@ -23,6 +23,8 @@ class MyApp extends StatelessWidget {
 }
 
 class TestDatabasePage extends StatefulWidget {
+  const TestDatabasePage({super.key});
+
   @override
   State<TestDatabasePage> createState() => _TestDatabasePageState();
 }
