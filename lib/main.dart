@@ -9,6 +9,7 @@ import 'screens/edit-profile/edit.dart';
 import 'screens/edit-profile/simpan.dart';
 
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -37,10 +38,11 @@ class MyApp extends StatelessWidget {
       ),
           
           routes: {
-        '/profile': (context) => ProfilePage(),
-        '/edit-profile': (context) => EditPage(),
-        '/simpan-profile': (context) => SimpanPage(),
-      },
+          '/profile': (context) => ProfilePage(),
+          '/edit-profile': (context) => EditProfilePage(),
+          '/simpan-profile': (context) => SimpanProfilePage(),
+        },
+
 
       // --- BAGIAN 3: TENTUKAN HALAMAN PERTAMA ---
       // Di sini kita pasang halaman PilihKendaraanPage sebagai halaman utama yang muncul
