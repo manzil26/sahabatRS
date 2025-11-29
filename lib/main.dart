@@ -36,5 +36,14 @@ class MyApp extends StatelessWidget {
       // Di sini kita pasang halaman PilihKendaraanPage sebagai halaman utama yang muncul
       home: const PilihKendaraanPage(), 
     );
+    routes: {
+        '/profile': (context) => const ProfilePage(),
+        '/edit-profile': (context) => const EditProfilePage(),
+        '/simpan-profile': (context) => const SimpanProfilePage(),
+      },
+
+      // halaman awal tetap seperti aslinya
+      home: const PilihKendaraanPage(),
+    );
   }
 }

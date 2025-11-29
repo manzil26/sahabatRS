@@ -21,3 +21,10 @@ flutter:
 
   assets:
     - assets/images/
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.10.3
+  iconify_flutter: ^0.0.5
+
