@@ -69,7 +69,7 @@ Pastikan Anda telah menginstal:
 Salin repositori ini ke komputer lokal Anda:
 
 ```bash
-git clone [https://github.com/manzil26/sahabat-rs.git](https://github.com/manzil26/sahabat-rs.git)
+git clone https://github.com/manzil26/sahabatRS.git
 cd sahabat-rs
 ````
 
@@ -109,7 +109,7 @@ flutter run
 
 Desain antarmuka aplikasi ini dirancang menggunakan Figma. Anda dapat melihat *High-Fidelity Prototype* kami melalui tautan di bawah ini:
 
-🔗 **[Lihat Desain Figma SahabatRS](https://www.google.com/search?q=https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-%3Fnode-id%3D2-3%26t%3DZJVZkgQB83cn7sWW-1)**
+🔗 **[Lihat Desain Figma SahabatRS](https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-2&t=XdKx4AX45IYXwlxd-1)**
 
 -----
 
@@ -118,14 +118,14 @@ Desain antarmuka aplikasi ini dirancang menggunakan Figma. Anda dapat melihat *H
 Berikut adalah anggota tim yang berkontribusi dalam pengembangan aplikasi SahabatRS:
 
 | NRP | Nama Anggota | Peran & Kontribusi Utama |
-| :--- | :--- | :--- |
-| **5026231036** | **Shafly Hidayatullah** | Fitur Transportasi, Implementasi CRUD Backend, Integrasi Supabase |
-| **5026231037** | **Al-Khiqmah Manzilatul M.** | Project Manager, Database Architect, GitHub Repo Management, BPMN |
-| **5026231038** | **Nabila Shinta Luthfia** | Fitur Pembayaran Digital, UI/UX Design, Fitur Chat |
-| **5026231128** | **Fadhiil Akmal Hamizan** | Fitur Layanan Darurat, Manajemen Halaman Profil |
-| **5026231196** | **Ni Kadek Adelia Paramita P.** | Fitur Live Tracking, Autentikasi User (Login/Register), Laporan |
-| **5026231139** | **Amandea Chandiki L.** | Riset Pendahuluan, Fitur Pengambilan Obat di Apotek |
-| **5026231176** | **Harya Raditya Handoyo** | Fitur Pendamping Rawat Jalan |
+| :--- | :--- |
+| **5026231036** | **Shafly Hidayatullah** |
+| **5026231037** | **Al-Khiqmah Manzilatul M.** |
+| **5026231038** | **Nabila Shinta Luthfia** |
+| **5026231128** | **Fadhiil Akmal Hamizan** |
+| **5026231196** | **Ni Kadek Adelia Paramita P.** |
+| **5026231139** | **Amandea Chandiki L.** |
+| **5026231176** | **Harya Raditya Handoyo** |
 
 -----
 
