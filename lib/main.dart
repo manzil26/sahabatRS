@@ -5,8 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // Pastikan nama file di folder screens/pendampingan sudah 'pilih_kendaraan.dart'
 import 'screens/pendampingan/pilih_kendaraan.dart'; 
 import 'screens/profile/profile.dart';
-import 'screens/profile/edit_profile.dart';
-import 'screens/profile/simpan_profile.dart';
+import 'screens/profile/edit.dart';
+import 'screens/profile/simpan.dart';
 
 
 void main() async {
@@ -38,8 +38,8 @@ class MyApp extends StatelessWidget {
           
           routes: {
         '/profile': (context) => ProfilePage(),
-        '/edit-profile': (context) => EditProfilePage(),
-        '/simpan-profile': (context) => SimpanProfilePage(),
+        '/edit-profile': (context) => EditPage(),
+        '/simpan-profile': (context) => SimpanPage(),
       },
 
       // --- BAGIAN 3: TENTUKAN HALAMAN PERTAMA ---
