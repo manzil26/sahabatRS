@@ -117,7 +117,7 @@ Desain antarmuka aplikasi ini dirancang menggunakan Figma. Anda dapat melihat *H
 
 Berikut adalah anggota tim yang berkontribusi dalam pengembangan aplikasi SahabatRS:
 
-| NRP | Nama Anggota | Peran & Kontribusi Utama |
+| NRP | Nama Anggota |
 | :--- | :--- |
 | **5026231036** | **Shafly Hidayatullah** |
 | **5026231037** | **Al-Khiqmah Manzilatul M.** |
