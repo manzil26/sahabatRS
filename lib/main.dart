@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// --- BAGIAN 1: PANGGIL FILE HALAMAN KAMU ---
+// Pastikan nama file di folder screens/pendampingan sudah 'pilih_kendaraan.dart'
+import 'screens/pendampingan/pilih_kendaraan.dart'; 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // --- BAGIAN 2: KONEKSI DATABASE (JANGAN DIUBAH) ---
   await Supabase.initialize(
     url: "https://ppvjjumolctwzrednvul.supabase.co",
     anonKey:
@@ -18,47 +23,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: TestDatabasePage());
-  }
-}
-
-class TestDatabasePage extends StatefulWidget {
-  const TestDatabasePage({super.key});
-
-  @override
-  State<TestDatabasePage> createState() => _TestDatabasePageState();
-}
-
-class _TestDatabasePageState extends State<TestDatabasePage> {
-  String result = "Loading...";
-
-  @override
-  void initState() {
-    super.initState();
-    testDatabase();
-  }
-
-  Future<void> testDatabase() async {
-    try {
-      final data = await Supabase.instance.client
-          .from('nama_tabel_kamu')
-          .select();
-
-      setState(() {
-        result = data.toString();
-      });
-    } catch (e) {
-      setState(() {
-        result = "Error: $e";
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Test Supabase')),
-      body: Padding(padding: const EdgeInsets.all(20), child: Text(result)),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false, // Biar tulisan DEBUG di pojok kanan atas hilang
+      title: 'Sahabat RS',
+      theme: ThemeData(
+        // Ini tema warna default aplikasi (bisa disesuaikan)
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        useMaterial3: true,
+      ),
+      
+      // --- BAGIAN 3: TENTUKAN HALAMAN PERTAMA ---
+      // Di sini kita pasang halaman PilihKendaraanPage sebagai halaman utama yang muncul
+      home: const PilihKendaraanPage(), 
     );
   }
 }
