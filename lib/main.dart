@@ -4,9 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // --- BAGIAN 1: PANGGIL FILE HALAMAN KAMU ---
 // Pastikan nama file di folder screens/pendampingan sudah 'pilih_kendaraan.dart'
 import 'screens/pendampingan/pilih_kendaraan.dart'; 
-import 'screens/profile/profile.dart';
-import 'screens/profile/edit.dart';
-import 'screens/profile/simpan.dart';
+import 'screens/edit-profile/profile.dart';
+import 'screens/edit-profile/edit.dart';
+import 'screens/edit-profile/simpan.dart';
 
 
 void main() async {
