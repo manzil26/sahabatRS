@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sahabat_rs/screens/auth/login-page.dart';
+import 'package:sahabat_rs/screens/main-features/halaman-user.dart'; // Pastikan import ini benar
+import 'package:sahabat_rs/screens/main-features/welcome-page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
@@ -6,8 +9,7 @@ void main() async {
 
   await Supabase.initialize(
     url: "https://ppvjjumolctwzrednvul.supabase.co",
-    anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
+    anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
   );
 
   runApp(const MyApp());
@@ -18,47 +20,25 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: TestDatabasePage());
-  }
-}
-
-class TestDatabasePage extends StatefulWidget {
-  const TestDatabasePage({super.key});
-
-  @override
-  State<TestDatabasePage> createState() => _TestDatabasePageState();
-}
-
-class _TestDatabasePageState extends State<TestDatabasePage> {
-  String result = "Loading...";
-
-  @override
-  void initState() {
-    super.initState();
-    testDatabase();
-  }
-
-  Future<void> testDatabase() async {
-    try {
-      final data = await Supabase.instance.client
-          .from('nama_tabel_kamu')
-          .select();
-
-      setState(() {
-        result = data.toString();
-      });
-    } catch (e) {
-      setState(() {
-        result = "Error: $e";
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Test Supabase')),
-      body: Padding(padding: const EdgeInsets.all(20), child: Text(result)),
+    return MaterialApp(
+      title: 'SahabatRS',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        fontFamily: 'Poppins',
+      ),
+      initialRoute: '/', 
+      routes: {
+        '/': (context) {
+          // CEK SESI DI SINI
+          final session = Supabase.instance.client.auth.currentSession;
+          
+          // Jika session ada, ke HomePage. Jika tidak, ke WelcomePage.
+          return session != null ? const HomePage() : const WelcomePage();
+        },
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
+      },
     );
   }
 }
