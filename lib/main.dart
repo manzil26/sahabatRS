@@ -4,9 +4,14 @@ import 'package:sahabat_rs/screens/main-features/halaman-user.dart'; // Pastikan
 import 'package:sahabat_rs/screens/main-features/welcome-page.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// --- BAGIAN 1: PANGGIL FILE HALAMAN KAMU ---
+// Pastikan nama file di folder screens/pendampingan sudah 'pilih_kendaraan.dart'
+import 'screens/pendampingan/pilih_kendaraan.dart'; 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // --- BAGIAN 2: KONEKSI DATABASE (JANGAN DIUBAH) ---
   await Supabase.initialize(
     url: "https://ppvjjumolctwzrednvul.supabase.co",
     anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
