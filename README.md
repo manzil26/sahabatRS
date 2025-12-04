@@ -85,14 +85,13 @@ flutter pub get
 
 Buat file `.env` di root folder atau sesuaikan konfigurasi di `lib/main.dart` dengan kredensial Supabase Anda.
 
-> **Catatan:** Pastikan Anda telah membuat project di dashboard Supabase dan mendapatkan `URL` serta `ANON KEY`.
-
 ```dart
 // Contoh di lib/main.dart
 await Supabase.initialize(
-  url: 'HTTPS://PROJECT-URL-ANDA.supabase.co',
-  anonKey: 'MASUKKAN-ANON-KEY-SUPABASE-ANDA-DISINI',
-);
+    url: "https://ppvjjumolctwzrednvul.supabase.co",
+    anonKey:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
+  );
 ```
 
 ### 5\. Jalankan Aplikasi
