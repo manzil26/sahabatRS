@@ -101,7 +101,7 @@ class JadwalService {
           .limit(1)
           .single();
 
-      if (response != null && response['tanggal'] != null) {
+      if (response['tanggal'] != null) {
         // Kolom tanggal adalah tipe DATE, parse langsung
         return DateTime.parse(response['tanggal']);
       }

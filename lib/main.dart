@@ -94,7 +94,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         // Tambahkan konfigurasi tema lain di sini
       ),
-
+      debugShowCheckedModeBanner: false,
       // SajadHomePage akan dijalankan setelah Supabase siap
       home: const SajadHomePage(),
     );
