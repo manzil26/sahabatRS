@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'sajad-tambah.dart'; // Import halaman tujuan Anda
 
 // Pastikan import model dan service sudah benar
 import '../../../../models/jadwal_obat.dart'; // Sesuaikan path jika perlu
@@ -446,7 +447,12 @@ class _SajadHomePageState extends State<SajadHomePage> {
                 FloatingActionButton(
                   mini: true,
                   onPressed: () {
-                    print('Tambah Jadwal Obat');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SajadTambahPage(),
+                      ),
+                    );
                   },
                   backgroundColor: _orangeAksen, // Warna Orange
                   child: const Icon(Icons.add, color: Colors.white),
