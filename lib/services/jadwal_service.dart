@@ -17,30 +17,23 @@ class JadwalService {
     try {
       // Query ke tabel 'checkup'
       final response = await supabase
-          .from('checkup') // Menggunakan tabel 'checkup' yang baru
+          .from('checkup')
           .select(
-            '*',
-          ) // Karena tabel ini sudah mencakup semua data yang dibutuhkan
+            'id_checkup, tanggal, lokasi, kegiatan, kondisi_tambahan, waktu_notifikasi',
+          )
           .eq('id_pengguna', _currentUserId)
           // Filter hanya yang akan datang (atau hari ini)
           .gte('tanggal', DateTime.now().toIso8601String().split('T')[0])
           .order('tanggal', ascending: true)
           .limit(1)
-          .maybeSingle(); // Menggunakan maybeSingle untuk menangani nol hasil
+          .maybeSingle();
 
       if (response == null) {
         return null;
       }
 
-      // Mapping data langsung ke model
-      return JadwalCheckUpDetail.fromMap({
-        'id_checkup': response['id_checkup'],
-        'tanggal': response['tanggal'],
-        'lokasi': response['lokasi'],
-        'kegiatan': response['kegiatan'],
-        'kondisi_tambahan': response['kondisi_tambahan'],
-        'waktu_notifikasi': response['waktu_notifikasi'],
-      });
+      // Mapping data ke model menggunakan fromMap
+      return JadwalCheckUpDetail.fromMap(response);
     } catch (e) {
       print('Error fetching Next Jadwal Check-Up Detail: $e');
       return null;
@@ -63,7 +56,46 @@ class JadwalService {
     }
   }
 
-  // --- 3. Ambil Tinjauan Obat Harian (Tidak Berubah) ---
+  // --- 3. Update Jadwal Obat ---
+  static Future<bool> updateObat(JadwalObat obat) async {
+    try {
+      await supabase
+          .from('jadwalobat')
+          .update({
+            'nama_obat': obat.namaObat,
+            'jumlah_obat': obat.jumlahObat,
+            'durasi_hari': obat.durasiHari,
+            'jenis_waktu_makan': obat.jenisWaktuMakan,
+            // Format TimeOfDay ke string "HH:MM:SS"
+            'jam_minum':
+                '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
+            'catatan': obat.catatan,
+            'status': obat.statusSelesai,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id_jadwalobat', obat.id)
+          .select();
+
+      return true;
+    } catch (e) {
+      print('Error updating Jadwal Obat: $e');
+      return false;
+    }
+  }
+
+  // --- 4. Hapus Jadwal Obat (Perbaikan Error PostgrestException) ---
+  static Future<bool> deleteObat(int idObat) async {
+    try {
+      // PERBAIKAN: Melewatkan variabel idObat (integer) alih-alih string literal 'idObat'
+      await supabase.from('jadwalobat').delete().eq('id_jadwalobat', idObat);
+      return true;
+    } catch (e) {
+      print('Error deleting Jadwal Obat: $e');
+      return false;
+    }
+  }
+
+  // --- 5. Ambil Tinjauan Obat Harian (Dibiarkan sama) ---
   static Future<List<JadwalObat>> getTinjauanObatHarian() async {
     try {
       // Query ke tabel jadwalobat

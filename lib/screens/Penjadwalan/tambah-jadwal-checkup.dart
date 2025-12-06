@@ -5,7 +5,7 @@ import 'package:sahabat_rs/services/jadwal_service.dart'; // Sesuaikan path serv
 
 // --- Konstanta Warna ---
 // Orange/Aksen Color
-const Color _orangeAksen = Color(0xFFFC770F);
+const Color _orangeAksen = Color(0xFFF6A230);
 // Warna latar belakang input field
 const Color _inputBgColor = Color(0xFFF8F8F6);
 // Warna teks dalam input
@@ -299,9 +299,14 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
               ).pop(); // Batal kembali ke halaman sebelumnya
             },
             child: const Text(
-              'Batal',
+              'simpan',
               style: TextStyle(
-                color: Colors.red, // Warna merah untuk tombol Batal
+                color: Color.fromARGB(
+                  255,
+                  0,
+                  0,
+                  0,
+                ), // Warna merah untuk tombol Batal
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -388,7 +393,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
               elevation: 3,
             ),
             child: const Text(
-              'Done',
+              'Simpan',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

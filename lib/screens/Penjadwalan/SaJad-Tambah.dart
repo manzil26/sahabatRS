@@ -4,7 +4,7 @@ import '../../../../models/jadwal_obat.dart'; // Import model untuk tipe data ji
 
 // --- Konstanta Warna ---
 // Orange/Filter Button Color dari Sajad Home
-const Color _orangeAksen = Color(0xFFFC770F);
+const Color _orangeAksen = Color(0xFFF6A230);
 // Warna latar belakang input field
 const Color _inputBgColor = Color(0xFFF8F8F6);
 // Warna teks dalam input
@@ -103,7 +103,7 @@ class SajadTambahPage extends StatefulWidget {
 
 class _SajadTambahPageState extends State<SajadTambahPage> {
   // State untuk form
-  String _namaObat = 'Sanmol';
+  String _namaObat = 'Masukkan Nama Obat';
   int _jumlahObat = 2;
   String _jenisJumlah = 'pil'; // atau 'tablet', 'sendok', dll.
   int _durasiHari = 30;
@@ -114,7 +114,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
   // Controller untuk field yang kompleks
   final TextEditingController _namaObatController = TextEditingController(
-    text: 'Sanmol',
+    text: 'Masukkan Nama Obat',
   );
   final TextEditingController _catatanController = TextEditingController();
 
@@ -468,7 +468,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             InkWell(
               onTap: () {
                 // Logika untuk menambah waktu notifikasi
-                print('Tambah waktu notifikasi');
+                _buildNotifikasiInput();
               },
               child: Container(
                 width: 50,
@@ -550,9 +550,14 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               print('Hapus ditekan');
             },
             child: const Text(
-              'Hapus',
+              'Batal',
               style: TextStyle(
-                color: Colors.red, // Warna merah untuk tombol Hapus
+                color: Color.fromARGB(
+                  255,
+                  0,
+                  0,
+                  0,
+                ), // Warna merah untuk tombol Hapus
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -573,7 +578,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
           children: <Widget>[
             // 1. Nama Obat
             _buildRoundedInputField(
-              label: 'Nama Obat',
+              label: 'Masukkan Nama Obat',
               controller: _namaObatController,
               prefixIcon: Image.asset(
                 'assets/images/penjadwalan/pil.png', // Sesuaikan path asset Anda
@@ -615,13 +620,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
                   assetPath: 'assets/images/penjadwalan/piring.png',
                   label: 'Sebelum Makan',
                 ),
-                WaktuMakanOption(
-                  value: WaktuMakan.saat,
-                  selectedValue: _waktuMakanTerpilih,
-                  onChanged: (val) => setState(() => _waktuMakanTerpilih = val),
-                  assetPath: 'assets/images/penjadwalan/piring.png',
-                  label: 'Saat Makan',
-                ),
+
                 WaktuMakanOption(
                   value: WaktuMakan.sesudah,
                   selectedValue: _waktuMakanTerpilih,
@@ -667,7 +666,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               elevation: 3,
             ),
             child: const Text(
-              'Done',
+              'Simpan',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
