@@ -1,79 +1,24 @@
-// import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   await Supabase.initialize(
-//     url: "https://ppvjjumolctwzrednvul.supabase.co",
-//     anonKey:
-//         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
-//   );
-
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(home: TestDatabasePage());
-//   }
-// }
-
-// class TestDatabasePage extends StatefulWidget {
-//   @override
-//   State<TestDatabasePage> createState() => _TestDatabasePageState();
-// }
-
-// class _TestDatabasePageState extends State<TestDatabasePage> {
-//   String result = "Loading...";
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     testDatabase();
-//   }
-
-//   Future<void> testDatabase() async {
-//     try {
-//       final data = await Supabase.instance.client
-//           .from('nama_tabel_kamu')
-//           .select();
-
-//       setState(() {
-//         result = data.toString();
-//       });
-//     } catch (e) {
-//       setState(() {
-//         result = "Error: $e";
-//       });
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(title: const Text('Test Supabase')),
-//       body: Padding(padding: const EdgeInsets.all(20), child: Text(result)),
-//     );
-//   }
-// }
-
 // lib/main.dart
+
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // 👈 Tambahkan import Supabase
-// Sesuaikan import path di bawah ini! (Pastikan ini sesuai dengan path SajadHomePage)
-import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart'; // 👈 Sesuaikan path
+import 'package:supabase_flutter/supabase_flutter.dart';
+// 👇 TAMBAH BARIS INI 👇
+import 'package:intl/date_symbol_data_local.dart'; // Import untuk inisialisasi locale data
+// 👆 TAMBAH BARIS INI 👆
+
+// Sesuaikan import path di bawah ini!
+import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 
 void main() async {
-  // 👈 HARUS ASYNC
-  WidgetsFlutterBinding.ensureInitialized(); // 👈 Harus dipanggil sebelum inisialisasi
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // --- INISIALISASI LOCALE DATA (PERBAIKAN ERROR) ---
+  // Panggil fungsi inisialisasi untuk bahasa Indonesia (id_ID)
+  await initializeDateFormatting('id_ID', null);
+  // --- END INISIALISASI LOCALE DATA ---
 
   // --- INISIALISASI SUPABASE ---
   await Supabase.initialize(
-    // 👈 Harus menggunakan AWAIT
     url: "https://ppvjjumolctwzrednvul.supabase.co",
     anonKey:
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
@@ -90,12 +35,19 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SAHABAT RS',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        // Tambahkan konfigurasi tema lain di sini
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       debugShowCheckedModeBanner: false,
-      // SajadHomePage akan dijalankan setelah Supabase siap
+      // Pastikan menggunakan localizationsDelegates untuk mendukung bahasa Indonesia
+      localizationsDelegates: const [
+        // Tambahkan delegates jika menggunakan TableCalendar atau widget lain yang membutuhkan
+        // GlobalMaterialLocalizations.delegate,
+        // GlobalWidgetsLocalizations.delegate,
+        // GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', 'US'),
+        Locale('id', 'ID'), // Dukungan untuk bahasa Indonesia
+      ],
       home: const SajadHomePage(),
     );
   }

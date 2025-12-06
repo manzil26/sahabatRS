@@ -1,23 +1,25 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'sajad-tambah.dart'; // Import halaman tujuan Anda
+// Note: Sesuaikan path ini jika SajadTambahPage berada di folder yang sama
+import 'sajad-tambah.dart';
+// Import halaman kalender JadwalPage
+import 'jadwal.dart';
 
 // Pastikan import model dan service sudah benar
-import '../../../../models/jadwal_obat.dart'; // Sesuaikan path jika perlu
-import '../../../../services/jadwal_service.dart'; // Sesuaikan path jika perlu
+import '../../../../models/jadwal_obat.dart';
+import '../../../../services/jadwal_service.dart';
+// IMPORT MODEL BARU
+import '../../../../models/jadwal_checkup_detail.dart';
 
 // --- Kode Warna Khusus dari Gambar ---
-// Kuning Pastel untuk Check-Up Card (mirip dengan #FCE69B atau yang ada di gambar)
 const Color _kuningCheckUp = Color(0xFFFCDD7A);
-// Orange/Filter Button Color
 const Color _orangeAksen = Color(0xFFFC770F);
-// Warna Icon Biru Gelap/Ungu (dari icon Bantuan)
 const Color _biruGelapIcon = Color(0xFF5966B1);
 
 // Ukuran standar untuk wadah icon button kecil di appbar
 const double _kIconButtonSize = 30.0;
 
-// --- Widget Kustom untuk Item Obat ---
+// --- Widget Kustom untuk Item Obat (TIDAK BERUBAH) ---
 class ObatItem extends StatelessWidget {
   final JadwalObat obat;
 
@@ -63,45 +65,37 @@ class ObatItem extends StatelessWidget {
   Widget getObatIconWidget() {
     // Menggunakan Image.asset sesuai niat Anda
     return Image.asset(
-      'assets/images/penjadwalan/pil.png', // Ganti dengan path gambar Anda
-      width: 24, // Ukuran Ikon Pil disesuaikan
+      'assets/images/penjadwalan/pil.png',
+      width: 24,
       height: 24,
-      color:
-          Colors.grey[600], // Sesuaikan warna jika gambar adalah PNG monokrom
+      color: Colors.grey[600],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // KODE Image.asset YANG SALAH DIHAPUS DARI SINI
-
-    // Memformat TimeOfDay menjadi String
     final formattedTime = obat.jamMinum.format(context);
-
-    // Dapatkan status berdasarkan logika dan nama obat untuk simulasi 'Skip'
     final statusText = getStatusText(obat.statusSelesai, obat.jamMinum);
     final statusColor = getStatusColor(statusText);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Material(
-        color: const Color(0xFFF8F8F6), // Warna latar belakang Card
+        color: const Color(0xFFF8F8F6),
         borderRadius: BorderRadius.circular(15),
-        elevation: 1, // Memberikan sedikit bayangan
+        elevation: 1,
         child: InkWell(
           onTap: () {
             print('Detail ${obat.namaObat}');
           },
           borderRadius: BorderRadius.circular(15),
           child: Container(
-            padding: const EdgeInsets.all(16), // Padding di dalam Card
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Icon Obat (Menggunakan Widget kustom yang sudah memuat Image.asset)
-                getObatIconWidget(), // Icon/Gambar Pil
+                getObatIconWidget(),
 
                 const SizedBox(width: 15),
-                // Nama Obat
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +121,7 @@ class ObatItem extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            '• $statusText', // Tambahkan titik pemisah
+                            '• $statusText',
                             style: TextStyle(
                               color: statusColor,
                               fontSize: 14,
@@ -154,7 +148,7 @@ class ObatItem extends StatelessWidget {
   }
 }
 
-// --- Halaman Utama Sajad Home (Tidak Ada Perubahan Logika Utama) ---
+// --- Halaman Utama Sajad Home ---
 class SajadHomePage extends StatefulWidget {
   const SajadHomePage({Key? key}) : super(key: key);
 
@@ -163,20 +157,30 @@ class SajadHomePage extends StatefulWidget {
 }
 
 class _SajadHomePageState extends State<SajadHomePage> {
-  late Future<DateTime?> _futureJadwalCheckUp;
+  // DEKLARASI STATE: Menggunakan model detail baru
+  late Future<JadwalCheckUpDetail?> _futureJadwalCheckUp;
   late Future<List<JadwalObat>> _futureListObat;
 
   @override
   void initState() {
     super.initState();
-    // Panggil service untuk mendapatkan data
-    _futureJadwalCheckUp = JadwalService.getJadwalCheckUp();
+    // PANGGILAN SERVICE: Menggunakan fungsi baru yang mengembalikan detail
+    _futureJadwalCheckUp = JadwalService.getNextJadwalCheckUpDetail();
     _futureListObat = JadwalService.getTinjauanObatHarian();
   }
 
-  // Widget Builder untuk Jadwal Check-Up (Tidak Berubah)
+  // Fungsi refresh data setelah kembali dari halaman tambah
+  void _refreshData() {
+    setState(() {
+      _futureJadwalCheckUp = JadwalService.getNextJadwalCheckUpDetail();
+      _futureListObat = JadwalService.getTinjauanObatHarian();
+    });
+  }
+
+  // Widget Builder untuk Jadwal Check-Up
   Widget _buildCheckUpCard() {
-    return FutureBuilder<DateTime?>(
+    // FUTURE BUILDER: Menggunakan tipe data model detail baru
+    return FutureBuilder<JadwalCheckUpDetail?>(
       future: _futureJadwalCheckUp,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -188,16 +192,24 @@ class _SajadHomePageState extends State<SajadHomePage> {
           );
         }
 
-        DateTime? jadwal = snapshot.data;
-        String tanggalCheckUp = jadwal != null
-            ? DateFormat('dd MMMM yyyy').format(jadwal)
+        // PENGAMBILAN DATA: Mengambil detail dari snapshot
+        JadwalCheckUpDetail? detail = snapshot.data;
+
+        String tanggalCheckUp = detail != null
+            ? DateFormat('dd MMMM yyyy').format(detail.tanggal)
             : 'Belum ada jadwal';
+
+        // Menampilkan Lokasi Check-Up dan Kegiatan
+        String infoKegiatan = detail != null
+            // Menggunakan 'lokasi' dan 'kegiatan' dari model baru
+            ? '${detail.kegiatan} di ${detail.lokasi}'
+            : 'Selanjutnya pada';
 
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: _kuningCheckUp,
-            borderRadius: BorderRadius.circular(20), // Border lebih melingkar
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +228,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Selanjutnya pada',
+                      infoKegiatan, // Menampilkan Kegiatan & Lokasi
                       style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                     ),
                     Text(
@@ -229,7 +241,14 @@ class _SajadHomePageState extends State<SajadHomePage> {
                     ),
                     const SizedBox(height: 15),
                     InkWell(
+                      // ON TAP: Navigasi ke JadwalPage
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const JadwalPage(),
+                          ),
+                        );
                         print('Lihat Detail Check-Up');
                       },
                       child: const Text(
@@ -257,7 +276,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
     );
   }
 
-  // Widget Builder untuk Daftar Obat Harian (Tidak Berubah)
+  // Widget Builder untuk Daftar Obat Harian (TIDAK BERUBAH)
   Widget _buildDailyMedicationList() {
     return FutureBuilder<List<JadwalObat>>(
       future: _futureListObat,
@@ -267,7 +286,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
         }
 
         if (snapshot.hasError) {
-          print(snapshot.error); // Log error untuk debugging
+          print(snapshot.error);
           return const Center(
             child: Text('Gagal memuat data obat. Cek konsol.'),
           );
@@ -296,8 +315,8 @@ class _SajadHomePageState extends State<SajadHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Pastikan background halaman putih
-      // --- App Bar Kustom ---
+      backgroundColor: Colors.white,
+      // --- App Bar Kustom (TIDAK BERUBAH) ---
       appBar: AppBar(
         title: const Text(
           'Jadwal',
@@ -313,11 +332,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
 
         // Leading Icon (Panah Kembali)
         leading: IconButton(
-          // Ganti warna panah menjadi ORANYE
-          icon: const Icon(
-            Icons.arrow_back,
-            color: _orangeAksen, // DIUBAH MENJADI _orangeAksen
-          ),
+          icon: const Icon(Icons.arrow_back, color: _orangeAksen),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -325,14 +340,13 @@ class _SajadHomePageState extends State<SajadHomePage> {
 
         // Actions (Icon Bantuan dan Download)
         actions: [
-          // Icon Bantuan (Warna Biru Gelap)
           Padding(
-            padding: const EdgeInsets.only(right: 4.0), // Jarak antar ikon
+            padding: const EdgeInsets.only(right: 4.0),
             child: Container(
               width: _kIconButtonSize,
               height: _kIconButtonSize,
               decoration: const BoxDecoration(
-                color: _biruGelapIcon, // Warna biru gelap
+                color: _biruGelapIcon,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -341,7 +355,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
                 icon: const Icon(
                   Icons.help_outline,
                   color: Colors.white,
-                  size: 16, // Ukuran ikon diperkecil
+                  size: 16,
                 ),
                 onPressed: () {
                   print('Bantuan ditekan');
@@ -349,25 +363,19 @@ class _SajadHomePageState extends State<SajadHomePage> {
               ),
             ),
           ),
-
-          // Icon Download (Warna Orange)
           Padding(
-            padding: const EdgeInsets.only(right: 16.0), // Jarak ke tepi kanan
+            padding: const EdgeInsets.only(right: 16.0),
             child: Container(
               width: _kIconButtonSize,
               height: _kIconButtonSize,
               decoration: const BoxDecoration(
-                color: _orangeAksen, // Warna orange
+                color: _orangeAksen,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
-                icon: const Icon(
-                  Icons.download,
-                  color: Colors.white,
-                  size: 16, // Ukuran ikon diperkecil
-                ),
+                icon: const Icon(Icons.download, color: Colors.white, size: 16),
                 onPressed: () {
                   print('Download ditekan');
                 },
@@ -376,13 +384,10 @@ class _SajadHomePageState extends State<SajadHomePage> {
           ),
         ],
 
-        // Garis Bawah (Bottom Border) - DITAMBAHKAN KEMBALI
+        // Garis Bawah (Bottom Border)
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0), // Tinggi garis
-          child: Container(
-            color: Colors.grey[300], // Warna garis abu-abu terang
-            height: 1.0,
-          ),
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey[300], height: 1.0),
         ),
       ),
 
@@ -392,8 +397,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- Search Bar ---
-            // ... (Tidak Berubah)
+            // --- Search Bar (TIDAK BERUBAH) ---
             Row(
               children: [
                 Expanded(
@@ -406,7 +410,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.grey[100], // Abu-abu yang lebih terang
+                      fillColor: Colors.grey[100],
                       contentPadding: const EdgeInsets.symmetric(
                         vertical: 10,
                         horizontal: 10,
@@ -419,7 +423,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _orangeAksen, // Warna Orange
+                    color: _orangeAksen,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.filter_list, color: Colors.white),
@@ -447,14 +451,18 @@ class _SajadHomePageState extends State<SajadHomePage> {
                 FloatingActionButton(
                   mini: true,
                   onPressed: () {
+                    // LOGIKA NAVIGASI DENGAN REFRESH DATA
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const SajadTambahPage(),
                       ),
-                    );
+                    ).then((_) {
+                      // Refresh data obat dan check-up setelah kembali
+                      _refreshData();
+                    });
                   },
-                  backgroundColor: _orangeAksen, // Warna Orange
+                  backgroundColor: _orangeAksen,
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
