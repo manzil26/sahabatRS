@@ -1,31 +1,27 @@
+// screens/penjadwalan/sajad-tambah.dart
+
 import 'package:flutter/material.dart';
-// import 'package:flutter_svg/flutter_svg.dart'; // Jika ingin menggunakan SVG, tetapi saya akan menggunakan Image.asset/Icon sesuai assets
-import '../../../../models/jadwal_obat.dart'; // Import model untuk tipe data jika diperlukan
+import 'package:intl/intl.dart';
+import '../../../../models/jadwal_obat.dart'; // Import model
+import '../../../../services/jadwal_service.dart'; // Import service
 
 // --- Konstanta Warna ---
-// Orange/Filter Button Color dari Sajad Home
 const Color _orangeAksen = Color(0xFFF6A230);
-// Warna latar belakang input field
 const Color _inputBgColor = Color(0xFFF8F8F6);
-// Warna teks dalam input
 const Color _inputTextColor = Color(0xFF333333);
-// Warna icon dan teks abu-abu terang
 const Color _greyIconColor = Color(0xFF9E9E9E);
 
-// --- Tipe Enum untuk Waktu Makan (Konsisten dengan Model/Supabase) ---
-enum WaktuMakan {
-  sebelum, // Mirip dengan 'sebelum_makan'
-  saat, // Mirip dengan 'saat_makan'
-  sesudah, // Mirip dengan 'sesudah_makan'
-}
+// --- Tipe Enum untuk Waktu Makan ---
+// Memastikan nilai enum cocok dengan ENUM database: 'sebelum_makan', 'sesudah_makan'
+enum WaktuMakan { sebelum, saat, sesudah }
 
-// --- Widget untuk Pilihan Waktu Makan Kustom (Menggantikan Icon Sederhana) ---
+// --- Widget untuk Pilihan Waktu Makan Kustom (TIDAK BERUBAH) ---
 class WaktuMakanOption extends StatelessWidget {
   final WaktuMakan value;
   final WaktuMakan selectedValue;
   final ValueChanged<WaktuMakan> onChanged;
-  final String assetPath; // Path ke gambar piring
-  final String label; // Teks di bawah gambar
+  final String assetPath;
+  final String label;
 
   const WaktuMakanOption({
     Key? key,
@@ -39,14 +35,12 @@ class WaktuMakanOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSelected = value == selectedValue;
-    // Menggunakan Container yang dimodifikasi agar sesuai dengan tampilan di gambar.
-    // Latar belakang dan border akan berubah saat terpilih.
     return GestureDetector(
       onTap: () => onChanged(value),
       child: Column(
         children: [
           Container(
-            width: 80, // Ukuran wadah menyesuaikan gambar
+            width: 80,
             height: 80,
             decoration: BoxDecoration(
               color: isSelected ? _orangeAksen : Colors.white,
@@ -66,14 +60,10 @@ class WaktuMakanOption extends StatelessWidget {
                   : [],
             ),
             child: Center(
-              // Menggunakan Image.asset (seperti 'piring.png' di assets/images)
-              // Note: Dalam gambar yang Anda berikan, icon piring hanya ada satu (tengah) yang berwarna,
-              // dua lainnya abu-abu. Saya akan mensimulasikan ini.
               child: Image.asset(
                 assetPath,
                 width: 40,
                 height: 40,
-                // Mengganti warna gambar jika terpilih (asumsi PNG monokrom)
                 color: isSelected ? Colors.white : _greyIconColor,
               ),
             ),
@@ -91,6 +81,69 @@ class WaktuMakanOption extends StatelessWidget {
       ),
     );
   }
+}
+
+// --- Widget Kustom untuk Input Field (Contoh: Nama Obat) ---
+Widget _buildRoundedInputField({
+  required String label,
+  required TextEditingController controller,
+  Widget? prefixIcon,
+  Widget? suffixIcon,
+  bool readOnly = false,
+  VoidCallback? onTap,
+  String? initialValue,
+}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+          color: Colors.black,
+        ),
+      ),
+      const SizedBox(height: 10),
+      GestureDetector(
+        onTap: onTap,
+        child: AbsorbPointer(
+          absorbing: readOnly,
+          child: TextField(
+            controller: controller,
+            readOnly: readOnly,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: _inputBgColor,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 15,
+                horizontal: 20,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15.0),
+                borderSide: BorderSide.none,
+              ),
+              prefixIcon: prefixIcon != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: prefixIcon,
+                    )
+                  : null,
+              suffixIcon: suffixIcon != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: suffixIcon,
+                    )
+                  : null,
+              hintText: initialValue,
+              hintStyle: TextStyle(color: _inputTextColor),
+            ),
+            style: TextStyle(color: _inputTextColor, fontSize: 16),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
 // --- Sajad Tambah Page ---
@@ -113,9 +166,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
   String _catatan = '';
 
   // Controller untuk field yang kompleks
-  final TextEditingController _namaObatController = TextEditingController(
-    text: 'Masukkan Nama Obat',
-  );
+  final TextEditingController _namaObatController = TextEditingController();
   final TextEditingController _catatanController = TextEditingController();
 
   @override
@@ -162,96 +213,59 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
     }
   }
 
-  // Fungsi untuk menyimpan data (simulasi)
-  void _simpanJadwal() {
-    // Di sini Anda akan membuat objek JadwalObat dan memanggil service untuk menyimpannya
-    // Contoh membuat model (tanpa ID pengguna, dll. untuk simulasi):
+  // Fungsi untuk menyimpan data (DIUBAH)
+  void _simpanJadwal() async {
+    // Dibuat async
+    // 1. Validasi
+    if (_namaObatController.text.isEmpty || _jumlahObat <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nama obat dan jumlah harus diisi.')),
+      );
+      return;
+    }
+
+    // Logic untuk mengkonversi WaktuMakan enum ke string database
+    String getJenisWaktuMakan() {
+      switch (_waktuMakanTerpilih) {
+        case WaktuMakan.sebelum:
+          return 'sebelum_makan';
+        case WaktuMakan.sesudah:
+          return 'sesudah_makan';
+        case WaktuMakan.saat:
+        default:
+          return 'saat_makan';
+      }
+    }
+
+    // 2. Buat objek JadwalObat
     final newJadwal = JadwalObat(
-      id: 0, // ID placeholder
-      idPengguna: 1, // Placeholder
+      id: 0, // ID placeholder, DB akan generate
+      idPengguna: 1, // Menggunakan ID 1 untuk simulasi pengguna saat ini
       namaObat: _namaObat,
       jamMinum: _jamMinum,
-      jenisWaktuMakan: _waktuMakanTerpilih
-          .toString()
-          .split('.')
-          .last, // 'sebelum', 'saat', 'sesudah'
+      jenisWaktuMakan: getJenisWaktuMakan(), // Menggunakan helper function
       statusSelesai: false,
       jumlahObat: _jumlahObat,
       durasiHari: _durasiHari,
       catatan: _catatan,
     );
 
-    print('Jadwal disimpan:');
-    print(
-      'Obat: ${newJadwal.namaObat}, Jumlah: ${newJadwal.jumlahObat} ${newJadwal.jenisWaktuMakan}, Jam: ${newJadwal.jamMinum.format(context)}, Durasi: ${newJadwal.durasiHari} Hari, Catatan: ${newJadwal.catatan}',
-    );
+    // 3. Panggil Service untuk Add Data
+    final success = await JadwalService.addObat(newJadwal);
 
-    // Setelah simpan, kembali ke halaman sebelumnya
+    String message;
+    if (success) {
+      message = 'Jadwal obat berhasil ditambahkan.';
+    } else {
+      message = 'Gagal menambahkan jadwal obat.';
+    }
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+
+    // 4. Kembali ke halaman sebelumnya
     Navigator.of(context).pop();
-  }
-
-  // --- Widget Kustom untuk Input Field (Contoh: Nama Obat) ---
-  Widget _buildRoundedInputField({
-    required String label,
-    required TextEditingController controller,
-    Widget? prefixIcon,
-    Widget? suffixIcon,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    String? initialValue,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap:
-              onTap, // Jika readOnly, onTap bisa digunakan untuk memicu picker
-          child: AbsorbPointer(
-            absorbing: readOnly, // Mencegah keyboard muncul jika readOnly
-            child: TextField(
-              controller: controller,
-              readOnly: readOnly,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: _inputBgColor,
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 15,
-                  horizontal: 20,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: prefixIcon != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: prefixIcon,
-                      )
-                    : null,
-                suffixIcon: suffixIcon != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: suffixIcon,
-                      )
-                    : null,
-                hintText: initialValue,
-                hintStyle: TextStyle(color: _inputTextColor),
-              ),
-              style: TextStyle(color: _inputTextColor, fontSize: 16),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   // --- Widget Kustom untuk Pilihan Jumlah & Durasi (2 Pil - 30 Hari) ---
@@ -467,8 +481,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             // Tombol Tambah Waktu
             InkWell(
               onTap: () {
-                // Logika untuk menambah waktu notifikasi
-                _buildNotifikasiInput();
+                print('Tambah waktu notifikasi');
               },
               child: Container(
                 width: 50,
@@ -547,19 +560,11 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         actions: [
           TextButton(
             onPressed: () {
-              print('Hapus ditekan');
+              Navigator.of(context).pop();
             },
             child: const Text(
               'Batal',
-              style: TextStyle(
-                color: Color.fromARGB(
-                  255,
-                  0,
-                  0,
-                  0,
-                ), // Warna merah untuk tombol Hapus
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -578,7 +583,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
           children: <Widget>[
             // 1. Nama Obat
             _buildRoundedInputField(
-              label: 'Masukkan Nama Obat',
+              label: 'Nama Obat',
               controller: _namaObatController,
               prefixIcon: Image.asset(
                 'assets/images/penjadwalan/pil.png', // Sesuaikan path asset Anda
@@ -666,7 +671,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               elevation: 3,
             ),
             child: const Text(
-              'Simpan',
+              'Done',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

@@ -112,4 +112,26 @@ class JadwalService {
       return [];
     }
   }
+
+  //--6 Tambahkan fungsi Tambah Jadwal Obat
+  static Future<bool> addObat(JadwalObat obat) async {
+    try {
+      final response = await supabase.from('jadwalobat').insert({
+        'id_pengguna': _currentUserId, // Menggunakan ID Pengguna saat ini
+        'nama_obat': obat.namaObat,
+        'jumlah_obat': obat.jumlahObat,
+        'durasi_hari': obat.durasiHari,
+        'jenis_waktu_makan': obat.jenisWaktuMakan,
+        'jam_minum':
+            '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
+        'catatan': obat.catatan,
+        'status': false, // Default status: Belum selesai (false)
+      }).select();
+
+      return response.isNotEmpty;
+    } catch (e) {
+      print('Error adding Jadwal Obat: $e');
+      return false;
+    }
+  }
 }
