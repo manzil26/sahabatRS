@@ -3,20 +3,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart'; // Import Sajad Home
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Import halaman Darurat (Pastikan path import ini sesuai struktur folder Anda)
-// Asumsi file ada di folder screens/pengantaran-darurat/
+// Import halaman Darurat
 import '../pengantaran-darurat/Sadar-Pemesan.dart'; 
+// Import halaman Pilih Kendaraan
+import '../pendampingan/pilih_kendaraan.dart';
 
 // STUB / Placeholder agar tidak error
 class RiwayatPage extends StatelessWidget {
   const RiwayatPage({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(body: Center(child: Text("Halaman Riwayat")));
-}
-class PilihKendaraanPage extends StatelessWidget {
-  const PilihKendaraanPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text("Halaman Pilih Kendaraan")));
 }
 
 class HalamanUser extends StatefulWidget {
@@ -426,6 +422,7 @@ class _KategoriCard extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const SadarPemesan()),
             );
           } else {
+            // -- NAVIGASI KE PILIH KENDARAAN (DIPERBAIKI) --
             Navigator.push(
               context,
               MaterialPageRoute(

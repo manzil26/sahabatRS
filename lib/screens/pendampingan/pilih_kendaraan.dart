@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/Sadar-Pemesan.dart'; // Import halaman tujuan
 
 class PilihKendaraanPage extends StatelessWidget {
   const PilihKendaraanPage({super.key});
@@ -10,11 +11,11 @@ class PilihKendaraanPage extends StatelessWidget {
       // --- APP BAR (HEADER) ---
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0, // Biar flat tidak ada bayangan default
+        elevation: 0, 
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.orange), // Panah Oranye
+          icon: const Icon(Icons.arrow_back, color: Colors.orange), 
           onPressed: () {
-            Navigator.pop(context); // Fungsi kembali
+            Navigator.pop(context); 
           },
         ),
         title: const Text(
@@ -27,11 +28,10 @@ class PilihKendaraanPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help, color: Colors.indigo), // Icon tanya biru tua
+            icon: const Icon(Icons.help, color: Colors.indigo), 
             onPressed: () {},
           )
         ],
-        // Garis tipis di bawah AppBar
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
@@ -46,31 +46,39 @@ class PilihKendaraanPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           children: [
-            const SizedBox(height: 20), // Jarak dari atas
+            const SizedBox(height: 20), 
             
             // KARTU 1: MOBIL
             _buildVehicleCard(
               title: "Mobil",
-              imagePath: "assets/images/mobil.png", // GANTI dengan path gambarmu
-              bgColor: const Color(0xFF7986CB), // Warna Ungu Soft (Indigo 300)
+              // Pastikan path gambar benar
+              imagePath: "assets/images/mobil.png", 
+              bgColor: const Color(0xFF7986CB), 
               textColor: Colors.white,
               onTap: () {
-                print("Pilih Mobil");
-                // Masukkan logika navigasi di sini
+                // Navigasi ke SadarPemesan saat Mobil dipilih
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SadarPemesan()),
+                );
               },
             ),
 
-            const SizedBox(height: 24), // Jarak antar kartu
+            const SizedBox(height: 24), 
 
             // KARTU 2: MOTOR
             _buildVehicleCard(
               title: "Sepeda Motor",
-              imagePath: "assets/images/motor.png", // GANTI dengan path gambarmu
-              bgColor: const Color(0xFFFDD835), // Warna Kuning (Yellow 600)
-              textColor: Colors.brown[800]!, // Teks warna coklat tua biar kebaca
+              // Pastikan path gambar benar
+              imagePath: "assets/images/motor.png", 
+              bgColor: const Color(0xFFFDD835), 
+              textColor: Colors.brown[800]!, 
               onTap: () {
-                print("Pilih Motor");
-                // Masukkan logika navigasi di sini
+                // Navigasi ke SadarPemesan saat Motor dipilih
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SadarPemesan()),
+                );
               },
             ),
           ],
@@ -79,8 +87,7 @@ class PilihKendaraanPage extends StatelessWidget {
     );
   }
 
-  // --- WIDGET TAMBAHAN (Biar kodingan di atas gak ruwet) ---
-  // Ini fungsinya mirip component di Figma, jadi kita buat sekali, bisa dipanggil berkali-kali
+  // --- WIDGET TAMBAHAN ---
   Widget _buildVehicleCard({
     required String title,
     required String imagePath,
@@ -90,19 +97,19 @@ class PilihKendaraanPage extends StatelessWidget {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20), // Biar efek klik ngikutin bentuk bulat
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: double.infinity, // Lebar mentok kanan kiri
-        height: 180, // Tinggi kartu
+        width: double.infinity, 
+        height: 180, 
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20), // Sudut melengkung
+          borderRadius: BorderRadius.circular(20), 
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.3),
               spreadRadius: 2,
               blurRadius: 10,
-              offset: const Offset(0, 4), // Posisi bayangan ke bawah
+              offset: const Offset(0, 4), 
             ),
           ],
         ),
@@ -110,13 +117,11 @@ class PilihKendaraanPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Gambar Kendaraan
-            // PENTING: Pastikan gambar sudah didaftarkan di pubspec.yaml
             Image.asset(
               imagePath,
               height: 90, 
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
-                // Ini muncul kalau gambarmu belum ada/error
                 return const Icon(Icons.directions_car, size: 80, color: Colors.white54);
               },
             ),
