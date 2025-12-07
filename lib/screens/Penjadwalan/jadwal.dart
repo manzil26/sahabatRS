@@ -1,0 +1,544 @@
+// screens/penjadwalan/jadwal.dart
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:sahabat_rs/screens/Penjadwalan/edit-jadwal-checkup.dart';
+import '../../../../services/jadwal_service.dart';
+import '../../../../models/jadwal_checkup_detail.dart';
+import 'tambah-jadwal-checkup.dart';
+
+// --- Konstanta Warna ---
+const Color _orangeAksen = Color(0xFFF6A230);
+const Color _kuningCheckUp = Color(0xFFFCDD7A);
+const Color _biruGelapIcon = Color(0xFF5966B1);
+const Color _unguDetailHeader = Color(0xFF553A8C);
+
+// --- Widget Kustom untuk Tag Kondisi (TIDAK BERUBAH) ---
+class KondisiTag extends StatelessWidget {
+  final String text;
+  final Color color;
+  final Color textColor;
+
+  const KondisiTag({
+    Key? key,
+    required this.text,
+    this.color = _kuningCheckUp,
+    this.textColor = Colors.black87,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+// --- Halaman Utama Jadwal Check-Up ---
+class JadwalPage extends StatefulWidget {
+  const JadwalPage({Key? key}) : super(key: key);
+
+  @override
+  State<JadwalPage> createState() => _JadwalPageState();
+}
+
+class _JadwalPageState extends State<JadwalPage> {
+  // Future untuk jadwal terdekat (Next Checkup)
+  late Future<JadwalCheckUpDetail?> _futureNextCheckUp;
+  // Future untuk semua tanggal terjadwal (Untuk Kalender Marker)
+  late Future<List<DateTime>> _futureAllJadwalDates;
+  // Future untuk detail aktivitas di tanggal yang dipilih
+  late Future<JadwalCheckUpDetail?> _futureDailyActivities;
+
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    // [PERBAIKAN 1]: Set hari ini sebagai hari yang dipilih secara default
+    _selectedDay = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    _fetchData();
+    // [PERBAIKAN 2]: Memuat detail untuk hari ini saat pertama kali load
+    _futureDailyActivities = _fetchDetailForSelectedDay(_selectedDay!);
+  }
+
+  void _fetchData() {
+    _futureNextCheckUp = JadwalService.getNextJadwalCheckUpDetail();
+    _futureAllJadwalDates = JadwalService.getAllJadwalDates();
+  }
+
+  // Mengambil detail untuk tanggal spesifik (Menggunakan service yang sudah diperbaiki)
+  Future<JadwalCheckUpDetail?> _fetchDetailForSelectedDay(DateTime date) async {
+    return await JadwalService.getCheckupByDate(date);
+  }
+
+  void _refreshData() {
+    setState(() {
+      _fetchData();
+      // Refresh detail hari yang sedang dipilih
+      _futureDailyActivities = _fetchDetailForSelectedDay(
+        _selectedDay ?? DateTime.now(),
+      );
+    });
+  }
+
+  // Fungsi untuk berpindah bulan
+  void _changeMonth(int offset) {
+    setState(() {
+      _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + offset, 1);
+      // Tetap tampilkan detail hari pertama bulan baru
+      _selectedDay = _focusedDay;
+
+      // Update detail saat bulan berubah
+      _futureDailyActivities = _fetchDetailForSelectedDay(_selectedDay!);
+    });
+  }
+
+  // Fungsi untuk menangani klik pada tanggal
+  void _onDaySelected(DateTime date) {
+    setState(() {
+      _selectedDay = date;
+      // [PERBAIKAN 3]: Memuat detail aktivitas baru untuk tanggal yang diklik
+      _futureDailyActivities = _fetchDetailForSelectedDay(date);
+    });
+  }
+
+  // --- Widget Builder untuk Kalender Sederhana (Interaktif) ---
+  Widget _buildCalendar(
+    List<DateTime> allJadwalDates,
+    DateTime nextJadwalDate,
+  ) {
+    final now = DateTime.now();
+    bool isSameDay(DateTime a, DateTime b) =>
+        a.year == b.year && a.month == b.month && a.day == b.day;
+
+    // MENGGUNAKAN _focusedDay UNTUK MENDAPATKAN BULAN SAAT INI
+    final startOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
+    final endOfMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
+    final int firstWeekday = startOfMonth.weekday;
+    final int daysInMonth = endOfMonth.day;
+
+    // Menghitung offset (Minggu = 7 di Dart, kita sesuaikan ke 0)
+    final int startOffset = (firstWeekday == 7) ? 0 : firstWeekday;
+
+    final List<Widget> calendarDays = [];
+
+    // Tambahkan widget kosong untuk offset awal
+    for (int i = 0; i < startOffset; i++) {
+      calendarDays.add(const SizedBox.shrink());
+    }
+
+    // Tambahkan hari-hari di bulan
+    for (int day = 1; day <= daysInMonth; day++) {
+      final currentDate = DateTime(startOfMonth.year, startOfMonth.month, day);
+
+      // Penandaan Tanggal
+      // final bool isToday = isSameDay(currentDate, now);
+      final bool isSelected = isSameDay(currentDate, _selectedDay ?? now);
+      final bool isScheduled = allJadwalDates.any(
+        (d) => isSameDay(d, currentDate),
+      );
+
+      BoxDecoration decoration;
+      Color textColor = Colors.black;
+
+      // Logika Styling
+      if (isSelected) {
+        decoration = BoxDecoration(
+          border: Border.all(
+            color: _biruGelapIcon,
+            width: 2,
+          ), // Border biru/ungu
+          shape: BoxShape.circle,
+          color: isScheduled ? _kuningCheckUp.withOpacity(0.5) : null,
+        );
+        textColor = Colors.black;
+      } else if (isScheduled) {
+        decoration = BoxDecoration(
+          color: _kuningCheckUp,
+          shape: BoxShape.circle,
+          border: Border.all(color: _orangeAksen, width: 1),
+        );
+        textColor = Colors.black;
+      } else {
+        decoration = const BoxDecoration();
+      }
+
+      calendarDays.add(
+        GestureDetector(
+          onTap: () => _onDaySelected(currentDate),
+          child: Container(
+            alignment: Alignment.center,
+            decoration: decoration,
+            child: Text(
+              day.toString(),
+              style: TextStyle(fontWeight: FontWeight.w600, color: textColor),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header Bulan Tahun dengan Tombol Navigasi
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios, size: 18),
+              onPressed: () => _changeMonth(-1),
+            ),
+
+            // Judul Bulan Tahun
+            Text(
+              DateFormat('MMMM yyyy', 'id_ID').format(_focusedDay),
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+
+            IconButton(
+              icon: const Icon(Icons.arrow_forward_ios, size: 18),
+              onPressed: () => _changeMonth(1),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+
+        // Header Hari (S, M, T, W, T, F, S)
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text(
+              'S',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'M',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'T',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'W',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'T',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'F',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            Text(
+              'S',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+
+        // Grid Tanggal
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 7,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          children: calendarDays,
+        ),
+      ],
+    );
+  }
+
+  // --- Widget Builder untuk Kartu Detail Harian ---
+  Widget _buildDailyDetailSection() {
+    return FutureBuilder<JadwalCheckUpDetail?>(
+      // Future ini akan me-refresh setiap kali tanggal diklik
+      future: _futureDailyActivities,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        final detail = snapshot.data;
+        // Gunakan selectedDay yang saat ini di state.
+        final formattedDate = DateFormat(
+          'dd MMMM yyyy',
+          'id_ID',
+        ).format(_selectedDay ?? DateTime.now());
+
+        // Fungsi pembangun baris detail
+        Widget _buildDetailRow(String label, String value) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const Divider(color: Colors.grey),
+              ],
+            ),
+          );
+        }
+
+        // Konten Detail
+        return Container(
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.only(top: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 0,
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    detail != null
+                        ? 'Aktivitas pada $formattedDate'
+                        : 'Tidak ada Jadwal',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: _unguDetailHeader,
+                    ),
+                  ),
+                  // Perbaikan untuk potongan kode yang Anda berikan:
+                  // Asumsi detail adalah variabel yang sudah dideklarasikan (misalnya: JadwalCheckUpDetail? detail)
+
+                  // KODE SEBELUM PERBAIKAN:
+                  // InkWell(
+                  //   onTap: () { ... }
+                  // )
+                  // Icon(...)
+
+                  // KODE PERBAIKAN (Membungkus Icon dan Navigasi):
+                  InkWell(
+                    // Pastikan detail tidak null, karena kita tidak bisa mengedit data yang tidak ada
+                    onTap: detail != null
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                // Menggunakan MaterialPageRoute yang benar
+                                builder: (context) => EditJadwalCheckupPage(
+                                  detail: detail!,
+                                ), // Meneruskan detail non-null
+                              ),
+                            ).then((_) {
+                              // Di sini Anda biasanya akan memanggil _refreshData() jika fungsionalitas ini berada di SajadHome
+                              // Contoh: if (mounted) _refreshData();
+                              print('Kembali dari Edit Checkup');
+                            });
+                          }
+                        : null, // Jika detail null (belum ada jadwal), nonaktifkan tombol
+                    borderRadius: BorderRadius.circular(
+                      15,
+                    ), // Tambahkan ini agar InkWell rapi
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 4.0,
+                      ),
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.grey[400],
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 15),
+
+              if (detail != null) ...[
+                // Jika ada detail:
+                _buildDetailRow('Tanggal', formattedDate),
+                _buildDetailRow('Rumah Sakit', detail.lokasi),
+                _buildDetailRow('Kegiatan', detail.kegiatan),
+
+                const SizedBox(height: 15),
+
+                // Kondisi (Tags)
+                const Text(
+                  'Kondisi',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: detail.kondisiTambahan
+                      .split(',')
+                      .map((kondisi) => kondisi.trim())
+                      .where((s) => s.isNotEmpty)
+                      .map((kondisi) {
+                        return KondisiTag(text: kondisi, color: _kuningCheckUp);
+                      })
+                      .toList(),
+                ),
+              ] else ...[
+                // Jika tidak ada jadwal di hari yang dipilih
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Text(
+                      'Tidak ada aktivitas check-up pada $formattedDate.',
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // --- Widget Utama Build ---
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title: const Text(
+          'Jadwal Check-Up',
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.help_outline, color: _biruGelapIcon),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.file_download, color: _orangeAksen),
+            onPressed: () {},
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: Colors.grey[300], height: 1.0),
+        ),
+      ),
+
+      body: FutureBuilder<JadwalCheckUpDetail?>(
+        future: _futureNextCheckUp,
+        builder: (context, snapshotDetail) {
+          return FutureBuilder<List<DateTime>>(
+            future: _futureAllJadwalDates,
+            builder: (context, snapshotDates) {
+              if (snapshotDetail.connectionState == ConnectionState.waiting ||
+                  snapshotDates.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshotDetail.hasError || snapshotDates.hasError) {
+                print(snapshotDetail.error);
+                return const Center(child: Text('Gagal memuat data jadwal.'));
+              }
+
+              // Data Jadwal Check-Up
+              final JadwalCheckUpDetail? nextJadwal = snapshotDetail.data;
+              final List<DateTime> allJadwalDates = snapshotDates.data ?? [];
+
+              // Kalender memerlukan tanggal untuk menandai hari ini dan hari terjadwal
+              final DateTime nextDate = nextJadwal?.tanggal ?? DateTime.now();
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    // Kalender (Dinamis)
+                    _buildCalendar(allJadwalDates, nextDate),
+
+                    // Kartu Detail Harian
+                    _buildDailyDetailSection(),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+
+      // Floating Action Button Tambah Jadwal
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // LOGIKA NAVIGASI KE TAMBAH JADWAL CHECKUP
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TambahJadwalCheckupPage(),
+            ),
+          ).then((_) => _refreshData());
+        },
+        backgroundColor: const Color(0xFFFCDD7A),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+}
