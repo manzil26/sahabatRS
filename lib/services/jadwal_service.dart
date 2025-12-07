@@ -1,5 +1,3 @@
-// lib/services/jadwal_service.dart
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/jadwal_obat.dart';
 import '../models/jadwal_checkup_detail.dart';
@@ -8,10 +6,16 @@ import '../models/jadwal_checkup_detail.dart';
 final supabase = Supabase.instance.client;
 
 class JadwalService {
-  // Asumsi: ID pengguna yang sedang login
-  static const int _currentUserId = 1;
+  // Mengambil ID User yang sedang login secara dinamis
+  static String get _currentUserId {
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception("User belum login");
+    }
+    return user.id;
+  }
 
-  // --- 1. Ambil Jadwal Check-Up berikutnya (untuk SajadHome) ---
+  // --- 1. Ambil Jadwal Check-Up berikutnya ---
   static Future<JadwalCheckUpDetail?> getNextJadwalCheckUpDetail() async {
     try {
       final response = await supabase
@@ -19,7 +23,7 @@ class JadwalService {
           .select(
             'id_checkup, tanggal, lokasi, kegiatan, kondisi_tambahan, waktu_notifikasi',
           )
-          .eq('id_pengguna', _currentUserId)
+          .eq('id_pengguna', _currentUserId) // Menggunakan UUID user
           .gte('tanggal', DateTime.now().toIso8601String().split('T')[0])
           .order('tanggal', ascending: true)
           .limit(1)
@@ -36,7 +40,7 @@ class JadwalService {
     }
   }
 
-  // --- 2. Ambil Jadwal Check-Up berdasarkan Tanggal (untuk JadwalPage) ---
+  // --- 2. Ambil Jadwal Check-Up berdasarkan Tanggal ---
   static Future<JadwalCheckUpDetail?> getCheckupByDate(DateTime date) async {
     final dateString = date.toIso8601String().split('T')[0];
 
@@ -60,7 +64,7 @@ class JadwalService {
     }
   }
 
-  // --- 3. Ambil SEMUA Jadwal Check-Up untuk Kalender (Hanya tanggal) ---
+  // --- 3. Ambil SEMUA Jadwal Check-Up untuk Kalender ---
   static Future<List<DateTime>> getAllJadwalDates() async {
     try {
       final List<Map<String, dynamic>> response = await supabase
@@ -76,10 +80,7 @@ class JadwalService {
     }
   }
 
-  // -------------------------------------------------------------
-  // FUNGSI YANG HILANG/DICARI DI SAJAD-HOME.DART (TINJAUAN OBAT)
-  // -------------------------------------------------------------
-  // --- 4. Ambil Tinjauan Obat Harian (DIBUTUHKAN DI SAJAD-HOME.DART) ---
+  // --- 4. Ambil Tinjauan Obat Harian ---
   static Future<List<JadwalObat>> getTinjauanObatHarian() async {
     try {
       final List<Map<String, dynamic>> response = await supabase
@@ -94,7 +95,6 @@ class JadwalService {
       return [];
     }
   }
-  // -------------------------------------------------------------
 
   // --- 5. Update Jadwal Obat ---
   static Future<bool> updateObat(JadwalObat obat) async {
@@ -122,7 +122,7 @@ class JadwalService {
     }
   }
 
-  // --- 6. Hapus Jadwal Obat (tetap sama) ---
+  // --- 6. Hapus Jadwal Obat ---
   static Future<bool> deleteObat(int idObat) async {
     try {
       await supabase.from('jadwalobat').delete().eq('id_jadwalobat', idObat);
@@ -133,13 +133,11 @@ class JadwalService {
     }
   }
 
-  // --- 7. Tambah Jadwal Obat (tetap sama) ---
+  // --- 7. Tambah Jadwal Obat ---
   static Future<bool> addObat(JadwalObat obat) async {
     try {
-      const int currentUserId = 1;
-
       final response = await supabase.from('jadwalobat').insert({
-        'id_pengguna': currentUserId,
+        'id_pengguna': _currentUserId,
         'nama_obat': obat.namaObat,
         'jumlah_obat': obat.jumlahObat,
         'durasi_hari': obat.durasiHari,
@@ -157,13 +155,11 @@ class JadwalService {
     }
   }
 
-  // --- 8. Tambah Jadwal Checkup (tetap sama) ---
+  // --- 8. Tambah Jadwal Checkup ---
   static Future<bool> addCheckup(JadwalCheckUpDetail detail) async {
     try {
-      const int currentUserId = 1;
-
       final response = await supabase.from('checkup').insert({
-        'id_pengguna': currentUserId,
+        'id_pengguna': _currentUserId,
         'tanggal': detail.tanggal.toIso8601String().split('T')[0],
         'lokasi': detail.lokasi,
         'kegiatan': detail.kegiatan,
@@ -179,11 +175,7 @@ class JadwalService {
     }
   }
 
-  // lib/services/jadwal_service.dart
-
-  // ... (di dalam class JadwalService) ...
-
-  // 8. Update Jadwal Checkup
+  // --- 9. Update Jadwal Checkup ---
   static Future<bool> updateCheckup(JadwalCheckUpDetail detail) async {
     try {
       await supabase
@@ -206,7 +198,7 @@ class JadwalService {
     }
   }
 
-  // 9. Hapus Jadwal Checkup
+  // --- 10. Hapus Jadwal Checkup ---
   static Future<bool> deleteCheckup(int idCheckup) async {
     try {
       await supabase.from('checkup').delete().eq('id_checkup', idCheckup);

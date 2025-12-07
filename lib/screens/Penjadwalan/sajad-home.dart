@@ -1,29 +1,26 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sahabat_rs/screens/Penjadwalan/edit-jadwal-checkup.dart';
 
-// Import Halaman (Asumsi SajadTambahPage, JadwalPage, dan SajadEditPage berada di folder yang sama)
+// Import halaman-halaman terkait
 import 'sajad-tambah.dart';
 import 'jadwal.dart';
-import 'sajad-edit.dart'; // Halaman Edit
+import 'sajad-edit.dart';
 
-// Import Model & Service
-import '../../../../models/jadwal_obat.dart';
-import '../../../../models/jadwal_checkup_detail.dart';
-import '../../../../services/jadwal_service.dart';
+// Import Model & Service (PATH DIPERBAIKI)
+import '../../models/jadwal_obat.dart';
+import '../../models/jadwal_checkup_detail.dart';
+import '../../services/jadwal_service.dart';
 
-// --- Kode Warna Khusus dari Gambar ---
+// --- Kode Warna Khusus ---
 const Color _kuningCheckUp = Color(0xFFFCDD7A);
 const Color _orangeAksen = Color(0xFFF6A230);
 const Color _biruGelapIcon = Color(0xFF5966B1);
-
-// Ukuran standar untuk wadah icon button kecil di appbar
 const double _kIconButtonSize = 30.0;
 
-// --- Widget Kustom untuk Item Obat (DIUBAH UNTUK MENERIMA CALLBACK REFRESH) ---
+// --- Widget Kustom untuk Item Obat ---
 class ObatItem extends StatelessWidget {
   final JadwalObat obat;
-  final VoidCallback? onEdit; // Callback untuk refresh Home setelah Edit
+  final VoidCallback? onEdit;
 
   const ObatItem({Key? key, required this.obat, this.onEdit}) : super(key: key);
 
@@ -38,7 +35,7 @@ class ObatItem extends StatelessWidget {
     );
 
     if (now.isAfter(scheduledTime)) {
-      return 'Selesai';
+      return 'Selesai'; // Logika sederhana, bisa disesuaikan
     }
     return 'Belum Dimulai';
   }
@@ -54,13 +51,14 @@ class ObatItem extends StatelessWidget {
     }
   }
 
-  // Fungsi untuk mendapatkan Icon Obat (diganti menjadi Image.asset)
   Widget getObatIconWidget() {
+    // Pastikan aset ini ada, jika tidak, gunakan Icon sebagai fallback
     return Image.asset(
       'assets/images/penjadwalan/pil.png',
       width: 24,
       height: 24,
       color: Colors.grey[600],
+      errorBuilder: (context, error, stackTrace) => Icon(Icons.medication, color: Colors.grey[600]),
     );
   }
 
@@ -77,7 +75,6 @@ class ObatItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         elevation: 1,
         child: InkWell(
-          // LOGIKA ONTAP BARU UNTUK NAVIGASI EDIT + REFRESH
           onTap: () {
             Navigator.push(
               context,
@@ -85,7 +82,6 @@ class ObatItem extends StatelessWidget {
                 builder: (context) => SajadEditPage(obat: obat),
               ),
             ).then((_) {
-              // Panggil callback refresh saat kembali dari EditPage
               if (onEdit != null) {
                 onEdit!();
               }
@@ -97,7 +93,6 @@ class ObatItem extends StatelessWidget {
             child: Row(
               children: [
                 getObatIconWidget(),
-
                 const SizedBox(width: 15),
                 Expanded(
                   child: Column(
@@ -112,7 +107,6 @@ class ObatItem extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      // Waktu dan Status
                       Row(
                         children: [
                           Text(
@@ -136,7 +130,6 @@ class ObatItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Panah (>)
                 const Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
@@ -160,7 +153,6 @@ class SajadHomePage extends StatefulWidget {
 }
 
 class _SajadHomePageState extends State<SajadHomePage> {
-  // DEKLARASI STATE: Menggunakan model detail baru
   late Future<JadwalCheckUpDetail?> _futureJadwalCheckUp;
   late Future<List<JadwalObat>> _futureListObat;
 
@@ -175,14 +167,12 @@ class _SajadHomePageState extends State<SajadHomePage> {
     _futureListObat = JadwalService.getTinjauanObatHarian();
   }
 
-  // Fungsi refresh data setelah kembali dari halaman tambah/edit
   void _refreshData() {
     setState(() {
       _fetchData();
     });
   }
 
-  // Widget Builder untuk Jadwal Check-Up
   Widget _buildCheckUpCard() {
     return FutureBuilder<JadwalCheckUpDetail?>(
       future: _futureJadwalCheckUp,
@@ -229,20 +219,19 @@ class _SajadHomePageState extends State<SajadHomePage> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      infoKegiatan, // Menampilkan Kegiatan & Lokasi
+                      infoKegiatan,
                       style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                     ),
                     Text(
-                      tanggalCheckUp, // Menampilkan tanggal
+                      tanggalCheckUp,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black, // Warna teks hitam
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 15),
                     InkWell(
-                      // ON TAP: Navigasi ke JadwalPage
                       onTap: () {
                         Navigator.push(
                           context,
@@ -254,7 +243,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
                       child: const Text(
                         'Selengkapnya',
                         style: TextStyle(
-                          color: _biruGelapIcon, // Warna biru gelap
+                          color: _biruGelapIcon,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -262,12 +251,13 @@ class _SajadHomePageState extends State<SajadHomePage> {
                   ],
                 ),
               ),
-              // Image - sesuaikan ukuran dan path
+              // Image placeholder jika tidak ada asset
               Image.asset(
-                'assets/images/penjadwalan/notes.png', // Ganti dengan path gambar Anda
-                width: 200, // Sesuaikan lebar
-                height: 200, // Sesuaikan tinggi
+                'assets/images/penjadwalan/notes.png',
+                width: 100,
+                height: 100,
                 fit: BoxFit.contain,
+                errorBuilder: (ctx, err, stack) => const Icon(Icons.note_alt, size: 80, color: Colors.white),
               ),
             ],
           ),
@@ -276,7 +266,6 @@ class _SajadHomePageState extends State<SajadHomePage> {
     );
   }
 
-  // Widget Builder untuk Daftar Obat Harian
   Widget _buildDailyMedicationList() {
     return FutureBuilder<List<JadwalObat>>(
       future: _futureListObat,
@@ -286,10 +275,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
         }
 
         if (snapshot.hasError) {
-          print(snapshot.error);
-          return const Center(
-            child: Text('Gagal memuat data obat. Cek konsol.'),
-          );
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -307,7 +293,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
           itemBuilder: (context, index) {
             return ObatItem(
               obat: listObat[index],
-              onEdit: _refreshData, // TERUSKAN REFRESH FUNCTION
+              onEdit: _refreshData,
             );
           },
         );
@@ -319,7 +305,6 @@ class _SajadHomePageState extends State<SajadHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // --- App Bar Kustom (TIDAK BERUBAH) ---
       appBar: AppBar(
         title: const Text(
           'Jadwal',
@@ -332,78 +317,29 @@ class _SajadHomePageState extends State<SajadHomePage> {
         centerTitle: false,
         elevation: 0,
         backgroundColor: Colors.white,
-
-        // Leading Icon (Panah Kembali)
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: _orangeAksen),
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
-
-        // Actions (Icon Bantuan dan Download)
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-
-            child: Container(
-              width: _kIconButtonSize,
-              height: _kIconButtonSize,
-              decoration: const BoxDecoration(
-                color: _biruGelapIcon,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(
-                  Icons.help_outline,
-                  color: Colors.white,
-                  size: 16,
-                ),
-                onPressed: () {
-                  print('Bantuan ditekan');
-                },
-              ),
-            ),
-          ),
-          Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: Container(
-              width: _kIconButtonSize,
-              height: _kIconButtonSize,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFC770F),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: const Icon(Icons.download, color: Colors.white, size: 16),
-                onPressed: () {
-                  print('Download ditekan');
-                },
-              ),
+            child: IconButton(
+              icon: const Icon(Icons.download, color: _orangeAksen),
+              onPressed: () {},
             ),
           ),
         ],
-
-        // Garis Bawah (Bottom Border)
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: Colors.grey[300], height: 1.0),
         ),
       ),
-
-      // --- Body ---
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // --- Search Bar (TIDAK BERUBAH) ---
             Row(
               children: [
                 Expanded(
@@ -425,7 +361,6 @@ class _SajadHomePageState extends State<SajadHomePage> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                // Icon Filter
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
@@ -436,12 +371,9 @@ class _SajadHomePageState extends State<SajadHomePage> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
             _buildCheckUpCard(),
             const SizedBox(height: 30),
-
-            // --- Tinjauan Obat Harian Header ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -453,27 +385,21 @@ class _SajadHomePageState extends State<SajadHomePage> {
                     color: Colors.black,
                   ),
                 ),
-                // Tombol Tambah (FloatingActionButton)
                 FloatingActionButton(
                   mini: true,
                   onPressed: () {
-                    // LOGIKA NAVIGASI DENGAN REFRESH DATA
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => const SajadTambahPage(),
                       ),
-                    ).then((_) {
-                      // Refresh data obat dan check-up setelah kembali
-                      _refreshData();
-                    });
+                    ).then((_) => _refreshData());
                   },
                   backgroundColor: const Color(0xFFFC770F),
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             ),
-
             const SizedBox(height: 15),
             _buildDailyMedicationList(),
           ],

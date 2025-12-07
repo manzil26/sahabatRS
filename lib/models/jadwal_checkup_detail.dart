@@ -1,5 +1,4 @@
-// lib/models/jadwal_checkup_detail.dart
-import 'package:flutter/material.dart'; // Tetap diperlukan untuk TimeOfDay, meskipun tidak digunakan di sini, tapi baik untuk standar model Flutter
+import 'package:flutter/material.dart'; // Tetap diperlukan untuk TimeOfDay
 
 class JadwalCheckUpDetail {
   final int idCheckup;

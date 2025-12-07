@@ -1,4 +1,3 @@
-// lib/models/jadwal_obat.dart
 import 'package:flutter/material.dart'; // Dibutuhkan untuk TimeOfDay
 
 class JadwalObat {

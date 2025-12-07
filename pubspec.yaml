@@ -1,17 +1,25 @@
 name: sahabat_rs
-description: 'A new Flutter project.'
+description: Aplikasi SahabatRS.
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
+  
+  # Dependensi Utama
   supabase_flutter: ^2.10.3
   flutter_svg: ^2.0.11
-  intl: ^0.19.0
+  
+  # Hapus baris intl ini, biarkan flutter_localizations yang mengaturnya
+  # intl: ^0.19.0 
+  
+  # Dependensi Lokalisasi (Penting untuk intl/tanggal)
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -20,7 +28,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Aset Gambar & Icon
   assets:
-    - assets/images/penjadwalan/
     - assets/images/
+    - assets/images/penjadwalan/
     - assets/icons/
