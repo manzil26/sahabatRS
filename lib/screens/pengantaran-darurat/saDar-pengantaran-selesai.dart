@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/SaDar - Rating.dart';
 
 class SadarPengantaranSelesai extends StatelessWidget {
   const SadarPengantaranSelesai({super.key});
@@ -23,7 +24,8 @@ class SadarPengantaranSelesai extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 35,
-                    backgroundImage: AssetImage("assets/driver.png"),
+                    child: Icon(Icons.person, size: 40),
+                    // backgroundImage: AssetImage("assets/driver.png"),
                   ),
                   const SizedBox(height: 10),
                   const Text("Esa Anugrah",
@@ -34,11 +36,17 @@ class SadarPengantaranSelesai extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Navigasi ke Rating
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SadarRating()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                       ),
-                      child: const Text("Pengantaran Selesai"),
+                      child: const Text("Pengantaran Selesai", style: TextStyle(color: Colors.white)),
                     ),
                   )
                 ],

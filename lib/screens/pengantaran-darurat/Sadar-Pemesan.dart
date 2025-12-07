@@ -1,14 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/saDar-mencari-lokasi.dart';
 
-class SadarPemesan extends StatelessWidget {
+class SadarPemesan extends StatefulWidget {
   const SadarPemesan({super.key});
+
+  @override
+  State<SadarPemesan> createState() => _SadarPemesanState();
+}
+
+class _SadarPemesanState extends State<SadarPemesan> {
+  @override
+  void initState() {
+    super.initState();
+    // Simulasi delay otomatis pindah ke halaman berikutnya setelah 3 detik
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SadarMencariLokasi()),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // MAP BACKGROUND (dummy background color)
+          // MAP BACKGROUND
           Container(color: Colors.grey.shade300),
 
           // BOTTOM PANEL
@@ -35,6 +55,8 @@ class SadarPemesan extends StatelessWidget {
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 16),
                         ),
+                        SizedBox(height: 10),
+                        CircularProgressIndicator(color: Colors.orange), // Tambahan indikator
                       ],
                     ),
                   ),
@@ -42,10 +64,12 @@ class SadarPemesan extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blueAccent),
-                      child: const Text("Batalkan Pesanan"),
+                      child: const Text("Batalkan Pesanan", style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],

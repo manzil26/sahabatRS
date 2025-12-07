@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/Sadar-Konfirmasi.dart';
 
 class SadarMencariLokasi extends StatelessWidget {
   const SadarMencariLokasi({super.key});
@@ -44,11 +45,18 @@ class SadarMencariLokasi extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Navigasi ke Konfirmasi
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SadarKonfirmasi()),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                       ),
-                      child: const Text("Pesan"),
+                      child: const Text("Pesan", style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],

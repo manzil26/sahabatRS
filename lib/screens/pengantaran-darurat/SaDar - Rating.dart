@@ -9,6 +9,7 @@ class SadarRating extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Beri Rating"),
         backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -17,7 +18,8 @@ class SadarRating extends StatelessWidget {
             const SizedBox(height: 30),
             const CircleAvatar(
               radius: 40,
-              backgroundImage: AssetImage("assets/driver.png"),
+              child: Icon(Icons.person, size: 50),
+              // backgroundImage: AssetImage("assets/driver.png"),
             ),
             const SizedBox(height: 15),
             const Text("Esa Anugrah",
@@ -48,10 +50,13 @@ class SadarRating extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Selesai -> Kembali ke Home (pop semua sampai home)
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
                 style:
                     ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                child: const Text("Kirim Rating"),
+                child: const Text("Kirim Rating", style: TextStyle(color: Colors.white)),
               ),
             )
           ],

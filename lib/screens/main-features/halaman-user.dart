@@ -3,6 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart'; // Import Sajad Home
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// Import halaman Darurat (Pastikan path import ini sesuai struktur folder Anda)
+// Asumsi file ada di folder screens/pengantaran-darurat/
+import '../pengantaran-darurat/Sadar-Pemesan.dart'; 
+
 // STUB / Placeholder agar tidak error
 class RiwayatPage extends StatelessWidget {
   const RiwayatPage({super.key});
@@ -416,10 +420,10 @@ class _KategoriCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           if (isEmergency) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Fitur Darurat akan segera tersedia.'),
-              ),
+            // -- NAVIGASI KE FITUR DARURAT --
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SadarPemesan()),
             );
           } else {
             Navigator.push(
