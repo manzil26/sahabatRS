@@ -22,3 +22,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/penjadwalan/
+    - assets/images/
+    - assets/icons/

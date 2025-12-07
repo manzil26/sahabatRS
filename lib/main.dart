@@ -9,6 +9,11 @@ import 'package:intl/date_symbol_data_local.dart'; // Import untuk inisialisasi 
 // Sesuaikan import path di bawah ini!
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 
+// screens
+import 'package:sahabat_rs/screens/auth/login-page.dart';
+import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
+import 'package:sahabat_rs/screens/main-features/welcome-page.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -18,6 +23,7 @@ void main() async {
   // --- END INISIALISASI LOCALE DATA ---
 
   // --- INISIALISASI SUPABASE ---
+  // Koneksi Supabase (punyamu, tidak diubah)
   await Supabase.initialize(
     url: "https://ppvjjumolctwzrednvul.supabase.co",
     anonKey:
@@ -49,6 +55,29 @@ class MyApp extends StatelessWidget {
         Locale('id', 'ID'), // Dukungan untuk bahasa Indonesia
       ],
       home: const SajadHomePage(),
+      title: 'SahabatRS',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        fontFamily: 'Poppins',
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) {
+          // cek sesi supabase
+          final session = Supabase.instance.client.auth.currentSession;
+
+          // kalau sudah login → langsung ke HalamanUser
+          // kalau belum → ke WelcomePage
+          return session != null ? HalamanUser() : WelcomePage();
+        },
+
+        // halaman login
+        '/login': (context) => LoginPage(),
+
+        // route home setelah login sukses
+        '/home': (context) => HalamanUser(),
+      },
     );
   }
 }
