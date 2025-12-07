@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sahabat_rs/screens/Penjadwalan/edit-jadwal-checkup.dart';
 import '../../../../services/jadwal_service.dart';
 import '../../../../models/jadwal_checkup_detail.dart';
 import 'tambah-jadwal-checkup.dart';
@@ -150,7 +149,7 @@ class _JadwalPageState extends State<JadwalPage> {
       final currentDate = DateTime(startOfMonth.year, startOfMonth.month, day);
 
       // Penandaan Tanggal
-      final bool isToday = isSameDay(currentDate, now);
+      // final bool isToday = isSameDay(currentDate, now);
       final bool isSelected = isSameDay(currentDate, _selectedDay ?? now);
       final bool isScheduled = allJadwalDates.any(
         (d) => isSameDay(d, currentDate),
@@ -354,49 +353,10 @@ class _JadwalPageState extends State<JadwalPage> {
                       color: _unguDetailHeader,
                     ),
                   ),
-                  // Perbaikan untuk potongan kode yang Anda berikan:
-                  // Asumsi detail adalah variabel yang sudah dideklarasikan (misalnya: JadwalCheckUpDetail? detail)
-
-                  // KODE SEBELUM PERBAIKAN:
-                  // InkWell(
-                  //   onTap: () { ... }
-                  // )
-                  // Icon(...)
-
-                  // KODE PERBAIKAN (Membungkus Icon dan Navigasi):
-                  InkWell(
-                    // Pastikan detail tidak null, karena kita tidak bisa mengedit data yang tidak ada
-                    onTap: detail != null
-                        ? () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                // Menggunakan MaterialPageRoute yang benar
-                                builder: (context) => EditJadwalCheckupPage(
-                                  detail: detail!,
-                                ), // Meneruskan detail non-null
-                              ),
-                            ).then((_) {
-                              // Di sini Anda biasanya akan memanggil _refreshData() jika fungsionalitas ini berada di SajadHome
-                              // Contoh: if (mounted) _refreshData();
-                              print('Kembali dari Edit Checkup');
-                            });
-                          }
-                        : null, // Jika detail null (belum ada jadwal), nonaktifkan tombol
-                    borderRadius: BorderRadius.circular(
-                      15,
-                    ), // Tambahkan ini agar InkWell rapi
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.grey[400],
-                        size: 16,
-                      ),
-                    ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.grey[400],
+                    size: 16,
                   ),
                 ],
               ),
