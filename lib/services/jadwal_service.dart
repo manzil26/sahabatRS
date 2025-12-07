@@ -178,4 +178,42 @@ class JadwalService {
       return false;
     }
   }
+
+  // lib/services/jadwal_service.dart
+
+  // ... (di dalam class JadwalService) ...
+
+  // 8. Update Jadwal Checkup
+  static Future<bool> updateCheckup(JadwalCheckUpDetail detail) async {
+    try {
+      await supabase
+          .from('checkup')
+          .update({
+            'tanggal': detail.tanggal.toIso8601String().split('T')[0],
+            'lokasi': detail.lokasi,
+            'kegiatan': detail.kegiatan,
+            'kondisi_tambahan': detail.kondisiTambahan,
+            'waktu_notifikasi':
+                '${detail.waktuNotifikasi!.hour.toString().padLeft(2, '0')}:${detail.waktuNotifikasi!.minute.toString().padLeft(2, '0')}:00',
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id_checkup', detail.idCheckup)
+          .select();
+      return true;
+    } catch (e) {
+      print('Error updating Jadwal Checkup: $e');
+      return false;
+    }
+  }
+
+  // 9. Hapus Jadwal Checkup
+  static Future<bool> deleteCheckup(int idCheckup) async {
+    try {
+      await supabase.from('checkup').delete().eq('id_checkup', idCheckup);
+      return true;
+    } catch (e) {
+      print('Error deleting Jadwal Checkup: $e');
+      return false;
+    }
+  }
 }
