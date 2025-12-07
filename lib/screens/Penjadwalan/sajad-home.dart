@@ -1,12 +1,11 @@
-﻿// screens/penjadwalan/sajad-home.dart
-
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sahabat_rs/screens/Penjadwalan/edit-jadwal-checkup.dart';
 
-// Import Halaman
+// Import Halaman (Asumsi SajadTambahPage, JadwalPage, dan SajadEditPage berada di folder yang sama)
 import 'sajad-tambah.dart';
 import 'jadwal.dart';
-import 'sajad-edit.dart';
+import 'sajad-edit.dart'; // Halaman Edit
 
 // Import Model & Service
 import '../../../../models/jadwal_obat.dart';
@@ -29,13 +28,6 @@ class ObatItem extends StatelessWidget {
   const ObatItem({Key? key, required this.obat, this.onEdit}) : super(key: key);
 
   String getStatusText(bool isSelesai, TimeOfDay jam) {
-    // Simulasi Status 'Terlewat'
-    if (obat.namaObat == 'Betanol') {
-      return 'Terlewat';
-    }
-
-    if (isSelesai) return 'Selesai';
-
     final now = DateTime.now();
     final scheduledTime = DateTime(
       now.year,
@@ -46,17 +38,17 @@ class ObatItem extends StatelessWidget {
     );
 
     if (now.isAfter(scheduledTime)) {
-      return 'Terlewat';
+      return 'Selesai';
     }
-    return 'Belum Diminum';
+    return 'Belum Dimulai';
   }
 
   Color getStatusColor(String status) {
     switch (status) {
       case 'Selesai':
-        return Colors.green[700]!;
-      case 'Terlewat':
-        return Colors.red;
+        return Colors.green;
+      case 'Belum Dimulai':
+        return const Color.fromARGB(255, 39, 94, 215);
       default:
         return Colors.grey;
     }
@@ -180,7 +172,6 @@ class _SajadHomePageState extends State<SajadHomePage> {
 
   void _fetchData() {
     _futureJadwalCheckUp = JadwalService.getNextJadwalCheckUpDetail();
-    // BARIS INI YANG ERROR
     _futureListObat = JadwalService.getTinjauanObatHarian();
   }
 

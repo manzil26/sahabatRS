@@ -150,7 +150,7 @@ class _JadwalPageState extends State<JadwalPage> {
       final currentDate = DateTime(startOfMonth.year, startOfMonth.month, day);
 
       // Penandaan Tanggal
-      final bool isToday = isSameDay(currentDate, now);
+      // final bool isToday = isSameDay(currentDate, now);
       final bool isSelected = isSameDay(currentDate, _selectedDay ?? now);
       final bool isScheduled = allJadwalDates.any(
         (d) => isSameDay(d, currentDate),
