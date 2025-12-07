@@ -1,3 +1,5 @@
+// screens/penjadwalan/tambah-jadwal-checkup.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Untuk memformat tanggal
 import 'package:sahabat_rs/models/jadwal_checkup_detail.dart'; // Sesuaikan path model
@@ -80,22 +82,13 @@ class TambahJadwalCheckupPage extends StatefulWidget {
 class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
   // State untuk data form
   DateTime? _selectedDate;
-  // Default waktu notifikasi (diatur ke 10:00 AM)
   TimeOfDay _selectedTime = const TimeOfDay(hour: 10, minute: 0);
 
-  // Controllers untuk input text (Nilai awal diatur secara dummy)
-  final TextEditingController _dateController = TextEditingController(
-    text: 'Date',
-  );
-  final TextEditingController _lokasiController = TextEditingController(
-    text: 'Rumah Sakit / Klinik',
-  );
-  final TextEditingController _kegiatanController = TextEditingController(
-    text: 'Contoh: Kontrol Dokter THT',
-  );
-  final TextEditingController _kondisiController = TextEditingController(
-    text: 'Contoh: Pengguna kursi roda, alergi obat',
-  );
+  // Controllers untuk input text (Nilai awal kosong, hint diatur di build)
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _lokasiController = TextEditingController();
+  final TextEditingController _kegiatanController = TextEditingController();
+  final TextEditingController _kondisiController = TextEditingController();
 
   // Controller untuk waktu
   final TextEditingController _timeController = TextEditingController();
@@ -106,15 +99,13 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
   @override
   void initState() {
     super.initState();
-    // Hapus pemanggilan _updateTimeController() dari sini
   }
 
-  // Panggil pemformatan yang menggunakan context di sini (lifecycle method yang aman)
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isTimeControllerInitialized) {
-      _updateTimeController(context); // Panggil dengan context
+      _updateTimeController(context);
       _isTimeControllerInitialized = true;
     }
   }
@@ -128,8 +119,6 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
     _timeController.dispose();
     super.dispose();
   }
-
-  // --- Fungsi Picker ---
 
   // 1. Pemilih Tanggal
   Future<void> _selectDate(BuildContext context) async {
@@ -185,7 +174,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
     if (picked != null && picked != _selectedTime) {
       setState(() {
         _selectedTime = picked;
-        _updateTimeController(context); // Panggil dengan context
+        _updateTimeController(context);
       });
     }
   }
@@ -197,11 +186,12 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
     });
   }
 
-  // --- Fungsi Simpan ---
+  // --- Fungsi Simpan (Diperbaiki untuk INSERT ke DB) ---
   void _simpanCheckup() async {
+    // 1. Validasi
     if (_selectedDate == null ||
-        _lokasiController.text.isEmpty ||
-        _kegiatanController.text.isEmpty) {
+        _lokasiController.text.trim().isEmpty ||
+        _kegiatanController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Tanggal, Lokasi, dan Kegiatan wajib diisi.'),
@@ -210,9 +200,31 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
       return;
     }
 
-    // Asumsi: Logic penyimpanan data ke database di sini
+    // 2. Buat objek JadwalCheckUpDetail
+    final newCheckup = JadwalCheckUpDetail(
+      idCheckup: 0, // Placeholder
+      tanggal: _selectedDate!,
+      lokasi: _lokasiController.text.trim(),
+      kegiatan: _kegiatanController.text.trim(),
+      kondisiTambahan: _kondisiController.text.trim(),
+      waktuNotifikasi: _selectedTime,
+    );
 
-    // Setelah selesai, kembali ke halaman sebelumnya
+    // 3. Panggil Service untuk Add Data
+    // Asumsi: JadwalService.addCheckup sudah diimplementasikan (INSERT ke tabel 'checkup')
+    final success = await JadwalService.addCheckup(newCheckup);
+
+    String message;
+    if (success) {
+      message = 'Jadwal Checkup berhasil ditambahkan.';
+    } else {
+      message = 'Gagal menambahkan Jadwal Checkup.';
+    }
+
+    // 4. Tampilkan pesan dan kembali
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
     Navigator.of(context).pop();
   }
 
@@ -239,7 +251,9 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
                 iconData: Icons.notifications_none,
                 readOnly: true,
                 onTap: () => _selectTime(context),
-                hintText: '10:00 AM',
+                hintText: _timeController.text.isEmpty
+                    ? '10:00 AM'
+                    : _timeController.text,
               ),
             ),
             const SizedBox(width: 10),
@@ -294,21 +308,11 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(
-                context,
-              ).pop(); // Batal kembali ke halaman sebelumnya
+              Navigator.of(context).pop();
             },
             child: const Text(
-              'simpan',
-              style: TextStyle(
-                color: Color.fromARGB(
-                  255,
-                  0,
-                  0,
-                  0,
-                ), // Warna merah untuk tombol Batal
-                fontWeight: FontWeight.w600,
-              ),
+              'Batal', // Diperbaiki menjadi Batal
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -332,7 +336,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
               iconData: Icons.calendar_today,
               readOnly: true,
               onTap: () => _selectDate(context),
-              hintText: 'Date',
+              hintText: 'Pilih Tanggal',
             ),
             const SizedBox(height: 20),
 
@@ -341,7 +345,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
               label: 'Lokasi',
               controller: _lokasiController,
               iconData: Icons.book_outlined,
-              hintText: 'lokasi',
+              hintText: 'Rumah Sakit / Klinik',
               readOnly: false,
             ),
             const SizedBox(height: 20),
@@ -373,7 +377,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
         ),
       ),
 
-      // --- Floating Action Button (DONE) ---
+      // --- Floating Action Button (DONE/Simpan) ---
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
           20,
@@ -393,7 +397,7 @@ class _TambahJadwalCheckupPageState extends State<TambahJadwalCheckupPage> {
               elevation: 3,
             ),
             child: const Text(
-              'Simpan',
+              'Done',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

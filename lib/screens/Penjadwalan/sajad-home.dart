@@ -1,10 +1,12 @@
-﻿import 'package:flutter/material.dart';
+﻿// screens/penjadwalan/sajad-home.dart
+
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-// Import Halaman (Asumsi SajadTambahPage, JadwalPage, dan SajadEditPage berada di folder yang sama)
+// Import Halaman
 import 'sajad-tambah.dart';
 import 'jadwal.dart';
-import 'sajad-edit.dart'; // Halaman Edit
+import 'sajad-edit.dart';
 
 // Import Model & Service
 import '../../../../models/jadwal_obat.dart';
@@ -178,6 +180,7 @@ class _SajadHomePageState extends State<SajadHomePage> {
 
   void _fetchData() {
     _futureJadwalCheckUp = JadwalService.getNextJadwalCheckUpDetail();
+    // BARIS INI YANG ERROR
     _futureListObat = JadwalService.getTinjauanObatHarian();
   }
 

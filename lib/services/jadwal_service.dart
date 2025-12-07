@@ -11,18 +11,15 @@ class JadwalService {
   // Asumsi: ID pengguna yang sedang login
   static const int _currentUserId = 1;
 
-  // --- 1. Ambil Jadwal Check-Up berikutnya dari tabel 'checkup' ---
-  // Tipe kembalian: Future<JadwalCheckUpDetail?>
+  // --- 1. Ambil Jadwal Check-Up berikutnya (untuk SajadHome) ---
   static Future<JadwalCheckUpDetail?> getNextJadwalCheckUpDetail() async {
     try {
-      // Query ke tabel 'checkup'
       final response = await supabase
           .from('checkup')
           .select(
             'id_checkup, tanggal, lokasi, kegiatan, kondisi_tambahan, waktu_notifikasi',
           )
           .eq('id_pengguna', _currentUserId)
-          // Filter hanya yang akan datang (atau hari ini)
           .gte('tanggal', DateTime.now().toIso8601String().split('T')[0])
           .order('tanggal', ascending: true)
           .limit(1)
@@ -32,7 +29,6 @@ class JadwalService {
         return null;
       }
 
-      // Mapping data ke model menggunakan fromMap
       return JadwalCheckUpDetail.fromMap(response);
     } catch (e) {
       print('Error fetching Next Jadwal Check-Up Detail: $e');
@@ -40,11 +36,35 @@ class JadwalService {
     }
   }
 
-  // --- 2. Ambil SEMUA Jadwal Check-Up untuk Kalender (Hanya tanggal) ---
+  // --- 2. Ambil Jadwal Check-Up berdasarkan Tanggal (untuk JadwalPage) ---
+  static Future<JadwalCheckUpDetail?> getCheckupByDate(DateTime date) async {
+    final dateString = date.toIso8601String().split('T')[0];
+
+    try {
+      final response = await supabase
+          .from('checkup')
+          .select(
+            'id_checkup, tanggal, lokasi, kegiatan, kondisi_tambahan, waktu_notifikasi',
+          )
+          .eq('id_pengguna', _currentUserId)
+          .eq('tanggal', dateString)
+          .maybeSingle();
+
+      if (response == null) {
+        return null;
+      }
+      return JadwalCheckUpDetail.fromMap(response);
+    } catch (e) {
+      print('Error fetching Checkup by Date ($dateString): $e');
+      return null;
+    }
+  }
+
+  // --- 3. Ambil SEMUA Jadwal Check-Up untuk Kalender (Hanya tanggal) ---
   static Future<List<DateTime>> getAllJadwalDates() async {
     try {
       final List<Map<String, dynamic>> response = await supabase
-          .from('checkup') // Menggunakan tabel 'checkup'
+          .from('checkup')
           .select('tanggal')
           .eq('id_pengguna', _currentUserId)
           .order('tanggal', ascending: true);
@@ -56,7 +76,27 @@ class JadwalService {
     }
   }
 
-  // --- 3. Update Jadwal Obat ---
+  // -------------------------------------------------------------
+  // FUNGSI YANG HILANG/DICARI DI SAJAD-HOME.DART (TINJAUAN OBAT)
+  // -------------------------------------------------------------
+  // --- 4. Ambil Tinjauan Obat Harian (DIBUTUHKAN DI SAJAD-HOME.DART) ---
+  static Future<List<JadwalObat>> getTinjauanObatHarian() async {
+    try {
+      final List<Map<String, dynamic>> response = await supabase
+          .from('jadwalobat')
+          .select('*')
+          .eq('id_pengguna', _currentUserId)
+          .order('jam_minum', ascending: true);
+
+      return response.map((data) => JadwalObat.fromJson(data)).toList();
+    } catch (e) {
+      print('Error fetching Tinjauan Obat Harian: $e');
+      return [];
+    }
+  }
+  // -------------------------------------------------------------
+
+  // --- 5. Update Jadwal Obat ---
   static Future<bool> updateObat(JadwalObat obat) async {
     try {
       await supabase
@@ -66,7 +106,6 @@ class JadwalService {
             'jumlah_obat': obat.jumlahObat,
             'durasi_hari': obat.durasiHari,
             'jenis_waktu_makan': obat.jenisWaktuMakan,
-            // Format TimeOfDay ke string "HH:MM:SS"
             'jam_minum':
                 '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
             'catatan': obat.catatan,
@@ -83,10 +122,9 @@ class JadwalService {
     }
   }
 
-  // --- 4. Hapus Jadwal Obat (Perbaikan Error PostgrestException) ---
+  // --- 6. Hapus Jadwal Obat (tetap sama) ---
   static Future<bool> deleteObat(int idObat) async {
     try {
-      // PERBAIKAN: Melewatkan variabel idObat (integer) alih-alih string literal 'idObat'
       await supabase.from('jadwalobat').delete().eq('id_jadwalobat', idObat);
       return true;
     } catch (e) {
@@ -95,29 +133,13 @@ class JadwalService {
     }
   }
 
-  // --- 5. Ambil Tinjauan Obat Harian (Dibiarkan sama) ---
-  static Future<List<JadwalObat>> getTinjauanObatHarian() async {
-    try {
-      // Query ke tabel jadwalobat
-      final List<Map<String, dynamic>> response = await supabase
-          .from('jadwalobat')
-          .select('*')
-          .eq('id_pengguna', _currentUserId)
-          .order('jam_minum', ascending: true);
-
-      // Mapping data ke model yang sudah diperbaiki
-      return response.map((data) => JadwalObat.fromJson(data)).toList();
-    } catch (e) {
-      print('Error fetching Tinjauan Obat Harian: $e');
-      return [];
-    }
-  }
-
-  //--6 Tambahkan fungsi Tambah Jadwal Obat
+  // --- 7. Tambah Jadwal Obat (tetap sama) ---
   static Future<bool> addObat(JadwalObat obat) async {
     try {
+      const int currentUserId = 1;
+
       final response = await supabase.from('jadwalobat').insert({
-        'id_pengguna': _currentUserId, // Menggunakan ID Pengguna saat ini
+        'id_pengguna': currentUserId,
         'nama_obat': obat.namaObat,
         'jumlah_obat': obat.jumlahObat,
         'durasi_hari': obat.durasiHari,
@@ -125,12 +147,34 @@ class JadwalService {
         'jam_minum':
             '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
         'catatan': obat.catatan,
-        'status': false, // Default status: Belum selesai (false)
+        'status': false,
       }).select();
 
       return response.isNotEmpty;
     } catch (e) {
       print('Error adding Jadwal Obat: $e');
+      return false;
+    }
+  }
+
+  // --- 8. Tambah Jadwal Checkup (tetap sama) ---
+  static Future<bool> addCheckup(JadwalCheckUpDetail detail) async {
+    try {
+      const int currentUserId = 1;
+
+      final response = await supabase.from('checkup').insert({
+        'id_pengguna': currentUserId,
+        'tanggal': detail.tanggal.toIso8601String().split('T')[0],
+        'lokasi': detail.lokasi,
+        'kegiatan': detail.kegiatan,
+        'kondisi_tambahan': detail.kondisiTambahan,
+        'waktu_notifikasi':
+            '${detail.waktuNotifikasi!.hour.toString().padLeft(2, '0')}:${detail.waktuNotifikasi!.minute.toString().padLeft(2, '0')}:00',
+      }).select();
+
+      return response.isNotEmpty;
+    } catch (e) {
+      print('Error adding Jadwal Checkup: $e');
       return false;
     }
   }
