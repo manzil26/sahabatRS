@@ -148,24 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     
                     const SizedBox(height: 10),
-                    // Checkbox & Tombol... (Bagian UI tetap sama, tidak berubah)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _signUp,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFF6A230),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        ),
-                        child: _isLoading 
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Buat Akun", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                    
-                    // ... (Checkbox dan tombol sama seperti sebelumnya)
-                    const SizedBox(height: 10),
+                    // Checkbox Simpan Akun
                     Row(
                       children: [
                         Checkbox(
@@ -179,6 +162,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 10),
 
+                    // Tombol Buat Akun
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -194,11 +178,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                     
-                    // ... (Sisa tombol google dan login link sama seperti sebelumnya)
                     const SizedBox(height: 15),
                     const Center(child: Text("atau", style: TextStyle(color: Colors.grey))),
                     const SizedBox(height: 15),
                     
+                    // Tombol Google (Placeholder)
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -220,6 +204,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
 
                     const SizedBox(height: 20),
+                    // Tombol Masuk
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -242,7 +227,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Widget Input yang diperbarui dengan Validator
+  // Widget Input Helper
   Widget _buildInput(String hint, TextEditingController controller, String iconPath, bool isPassword, String? Function(String?)? validator) {
     return TextFormField(
       controller: controller,
