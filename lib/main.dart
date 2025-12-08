@@ -1,62 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+// Import semua halaman
+import 'screens/pengantaran-darurat/sadar_pemesanan.dart';
+import 'screens/pengantaran-darurat/sadar_mencari_lokasi.dart';
+import 'screens/pengantaran-darurat/sadar_konfirmasi.dart';
+import 'screens/pengantaran-darurat/sadar_rating.dart';
+import 'screens/pengantaran-darurat/sadar_pengantaran_selesai.dart';
 
-  await Supabase.initialize(
-    url: "https://ppvjjumolctwzrednvul.supabase.co",
-    anonKey:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBwdmpqdW1vbGN0d3pyZWRudnVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQxMjU3NDksImV4cCI6MjA3OTcwMTc0OX0.62vU78949hwLBnNzuPq_hrGMwPY5aH7jFRzRbmvIJJc",
-  );
-
-  runApp(const MyApp());
+void main() {
+  runApp(const SahabatRS());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SahabatRS extends StatelessWidget {
+  const SahabatRS({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: TestDatabasePage());
-  }
-}
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
 
-class TestDatabasePage extends StatefulWidget {
-  @override
-  State<TestDatabasePage> createState() => _TestDatabasePageState();
-}
+      // Halaman pertama yang muncul
+      home: const SadarMencariLokasi(),
 
-class _TestDatabasePageState extends State<TestDatabasePage> {
-  String result = "Loading...";
 
-  @override
-  void initState() {
-    super.initState();
-    testDatabase();
-  }
-
-  Future<void> testDatabase() async {
-    try {
-      final data = await Supabase.instance.client
-          .from('nama_tabel_kamu')
-          .select();
-
-      setState(() {
-        result = data.toString();
-      });
-    } catch (e) {
-      setState(() {
-        result = "Error: $e";
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Test Supabase')),
-      body: Padding(padding: const EdgeInsets.all(20), child: Text(result)),
+      // Daftar route navigasi
+      routes: {
+        "/lokasi": (context) => const SadarMencariLokasi(),
+        "/konfirmasi": (context) => const SadarKonfirmasi(),
+        "/rating": (context) => const SadarRating(),
+        "/selesai": (context) => const SadarPengantaranSelesai(),
+      },
     );
   }
 }

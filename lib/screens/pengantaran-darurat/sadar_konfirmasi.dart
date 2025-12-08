@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class SadarKonfirmasi extends StatelessWidget {
   const SadarKonfirmasi({super.key});
@@ -8,7 +10,19 @@ class SadarKonfirmasi extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: Colors.grey.shade300),
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(-7.2756, 112.6426),
+              initialZoom: 15,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: "com.example.sahabat_rs",
+              ),
+            ],
+          ),
 
           Align(
             alignment: Alignment.bottomCenter,
@@ -20,7 +34,6 @@ class SadarKonfirmasi extends StatelessWidget {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
@@ -38,20 +51,13 @@ class SadarKonfirmasi extends StatelessWidget {
                           Text("Ambulance"),
                           Row(
                             children: [
-                              Icon(Icons.star, color: Colors.amber, size: 18),
+                              Icon(Icons.star,
+                                  color: Colors.amber, size: 18),
                               Text(" 5.0"),
                             ],
-                          )
+                          ),
                         ],
                       ),
-                      const Spacer(),
-                      Row(
-                        children: const [
-                          Icon(Icons.call, size: 28),
-                          SizedBox(width: 10),
-                          Icon(Icons.message, size: 28),
-                        ],
-                      )
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -68,8 +74,8 @@ class SadarKonfirmasi extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange),
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                       child: const Text("Lacak Pendampingan"),
                     ),
                   )

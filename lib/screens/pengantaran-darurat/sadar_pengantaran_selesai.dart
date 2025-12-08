@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class SadarPengantaranSelesai extends StatelessWidget {
   const SadarPengantaranSelesai({super.key});
@@ -8,7 +10,19 @@ class SadarPengantaranSelesai extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: Colors.grey.shade300),
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(-7.2756, 112.6426),
+              initialZoom: 15,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: "com.example.sahabat_rs",
+              ),
+            ],
+          ),
 
           Align(
             alignment: Alignment.bottomCenter,
