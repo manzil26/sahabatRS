@@ -239,11 +239,11 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
     // 2. Buat objek JadwalObat
     final newJadwal = JadwalObat(
-      id: 0, // ID placeholder, DB akan generate
-      idPengguna: 1, // Menggunakan ID 1 untuk simulasi pengguna saat ini
+      id: 0, 
+      idPengguna: '', // Kosongkan saja, nanti diisi otomatis di Service pakai UUID asli
       namaObat: _namaObat,
       jamMinum: _jamMinum,
-      jenisWaktuMakan: getJenisWaktuMakan(), // Menggunakan helper function
+      jenisWaktuMakan: getJenisWaktuMakan(),
       statusSelesai: false,
       jumlahObat: _jumlahObat,
       durasiHari: _durasiHari,

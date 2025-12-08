@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart'; // Dibutuhkan untuk TimeOfDay
+import 'package:flutter/material.dart';
 
 class JadwalObat {
   final int id;
-  final int idPengguna; // id_pengguna
-  final String namaObat; // nama_obat
-  final TimeOfDay jamMinum; // jam_minum (TIME di SQL)
-  final String jenisWaktuMakan; // jenis_waktu_makan (ENUM di SQL)
-  final bool statusSelesai; // status (BOOLEAN di SQL)
-
-  // Kolom lain dari tabel jadwalobat
+  final String idPengguna; // UBAH KE STRING (UUID)
+  final String namaObat;
+  final TimeOfDay jamMinum;
+  final String jenisWaktuMakan;
+  final bool statusSelesai;
   final int? jumlahObat;
   final int? durasiHari;
   final String? catatan;
@@ -25,27 +23,22 @@ class JadwalObat {
     this.catatan,
   });
 
-  // Factory Method untuk Supabase/JSON Mapping
   factory JadwalObat.fromJson(Map<String, dynamic> json) {
-    // 1. Parsing Jam Minum (TIME) dari Supabase
-    // Supabase mengembalikan TIME sebagai string "HH:MM:SS" (misal: "10:00:00")
     String timeString = json['jam_minum'];
     List<String> parts = timeString.split(':');
 
     TimeOfDay parsedTime = TimeOfDay(
-      hour: int.parse(parts[0]), // Jam (HH)
-      minute: int.parse(parts[1]), // Menit (MM)
+      hour: int.parse(parts[0]),
+      minute: int.parse(parts[1]),
     );
 
     return JadwalObat(
       id: json['id_jadwalobat'],
-      idPengguna: json['id_pengguna'],
+      idPengguna: json['id_pengguna'].toString(), // Pastikan jadi String
       namaObat: json['nama_obat'],
       jamMinum: parsedTime,
-      // Karena ENUM, langsung pakai String
       jenisWaktuMakan: json['jenis_waktu_makan'] ?? 'sebelum_makan',
-      statusSelesai: json['status'] ?? false, // Default: false (belum selesai)
-      // Kolom opsional
+      statusSelesai: json['status'] ?? false,
       jumlahObat: json['jumlah_obat'],
       durasiHari: json['durasi_hari'],
       catatan: json['catatan'],

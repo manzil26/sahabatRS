@@ -133,11 +133,15 @@ class JadwalService {
     }
   }
 
-  // --- 7. Tambah Jadwal Obat ---
+  // --- 7. Tambah Jadwal Obat (DIPERBAIKI) ---
   static Future<bool> addObat(JadwalObat obat) async {
     try {
+      // PENTING: Jangan gunakan obat.idPengguna (yang mungkin dummy/kosong)
+      // Gunakan _currentUserId yang asli dari sesi login
+      final userId = _currentUserId; 
+
       final response = await supabase.from('jadwalobat').insert({
-        'id_pengguna': _currentUserId,
+        'id_pengguna': userId, // UUID String
         'nama_obat': obat.namaObat,
         'jumlah_obat': obat.jumlahObat,
         'durasi_hari': obat.durasiHari,

@@ -285,8 +285,8 @@ class _SajadEditPageState extends State<SajadEditPage> {
 
     // 2. Buat objek yang diperbarui
     final updatedObat = JadwalObat(
-      id: widget.obat.id, // ID asli HARUS dipertahankan
-      idPengguna: widget.obat.idPengguna,
+      id: widget.obat.id,
+      idPengguna: widget.obat.idPengguna, // Sudah String (UUID)
       namaObat: _namaObatController.text,
       jamMinum: _jamMinum,
       jenisWaktuMakan: _waktuMakanTerpilih == WaktuMakan.sebelum
