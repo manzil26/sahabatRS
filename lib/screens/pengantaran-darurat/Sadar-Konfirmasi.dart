@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sahabat_rs/screens/pengantaran-darurat/saDar-pengantaran-selesai.dart';
+import 'package:sahabat_rs/screens/pelacakan/SaLacak-Tracking.dart'; // TAMBAH untuk tracking
 
 class SadarKonfirmasi extends StatelessWidget {
   const SadarKonfirmasi({super.key});
@@ -72,11 +73,13 @@ class SadarKonfirmasi extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {
                         // Navigasi ke Pengantaran Selesai
-                        Navigator.pushReplacement(
+                        //Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  const SadarPengantaranSelesai()),
+                                  //const SadarPengantaranSelesai()), //punya nabb aku koment sementara 
+                                  const SaLacakTrackingPage()),
                         );
                       },
                       style: ElevatedButton.styleFrom(

@@ -5,6 +5,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sahabat_rs/screens/auth/login-page.dart';
 import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
 import 'package:sahabat_rs/screens/main-features/welcome-page.dart';
+import 'package:sahabat_rs/screens/pelacakan/SaLacak.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,6 +54,7 @@ class MyApp extends StatelessWidget {
         },
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HalamanUser(),
+        '/salacak': (context) => const SaLacakPage(),
       },
     );
   }

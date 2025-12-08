@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart'; // Import Sajad Home
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sahabat_rs/services/salacak_service.dart'; // <-- PENTING
+import 'package:sahabat_rs/screens/edit-profile/profile.dart';
+
 
 // Import halaman Darurat
 import '../pengantaran-darurat/Sadar-Pemesan.dart'; 
@@ -569,9 +572,13 @@ class _SectionLayananLain extends StatelessWidget {
                 ),
               ),
               // UPDATE: Menggunakan Image asset path, bukan IconData
-              const _LayananLainItem(
+              // ITEM "Pelacakan" → buka halaman SaLacak
+              _LayananLainItem(
                 label: 'Pelacakan',
                 assetPath: 'assets/images/ic_pelacakan.png',
+                onTap: () {
+                  Navigator.of(context).pushNamed('/salacak');
+                },
               ),
               const _LayananLainItem(
                 label: 'Lainnya',
@@ -588,21 +595,25 @@ class _SectionLayananLain extends StatelessWidget {
 class _LayananLainItem extends StatelessWidget {
   final String label;
   final String assetPath; // UPDATE: Menerima String path gambar, bukan IconData
+  final VoidCallback? onTap; // <-- TAMBAH
 
-  const _LayananLainItem({required this.label, required this.assetPath});
+  const _LayananLainItem({required this.label, required this.assetPath, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F6FA),
-              borderRadius: BorderRadius.circular(20),
-            ),
+      child: InkWell(
+        onTap: onTap, // <-- sekarang bisa diklik
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F6FA),
+                borderRadius: BorderRadius.circular(20),
+              ),
             // UPDATE: Menambahkan padding dan menggunakan Image.asset
             padding: const EdgeInsets.all(12),
             child: Image.asset(assetPath, fit: BoxFit.contain),
@@ -611,8 +622,9 @@ class _LayananLainItem extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
