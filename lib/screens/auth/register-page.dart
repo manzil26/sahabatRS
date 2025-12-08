@@ -10,7 +10,6 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // Tambahkan GlobalKey untuk validasi form
   final _formKey = GlobalKey<FormState>();
 
   final _emailController = TextEditingController();
@@ -24,50 +23,46 @@ class _RegisterPageState extends State<RegisterPage> {
   final supabase = Supabase.instance.client;
 
   Future<void> _signUp() async {
-    // 1. Jalankan Validasi Form
     if (!_formKey.currentState!.validate()) {
-      return; // Berhenti jika tidak valid
+      return; 
     }
 
     setState(() => _isLoading = true);
     try {
+      // 1. Daftar ke Auth Supabase (Email & Password)
       final AuthResponse res = await supabase.auth.signUp(
         email: _emailController.text,
         password: _passwordController.text,
         data: {
-          'full_name': _nameController.text, // Simpan nama di metadata agar mudah diambil
+          'name': _nameController.text, // Simpan nama di metadata juga
         },
       );
-      
-      // Jika Trigger Database kamu sudah aktif, tabel profiles akan terisi otomatis.
-      // Jika BELUM, kamu bisa uncomment kode di bawah ini:
-      /*
-      if (res.user != null) {
-         await supabase.from('profiles').insert({
-          'id': res.user!.id,
-          'full_name': _nameController.text,
-          'role': 'pasien',
-        });
-      }
-      */
 
-      if (mounted) {
-        // Cek apakah user perlu konfirmasi email (Supabase default)
-        if (res.session == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Daftar berhasil! Cek email untuk verifikasi.")),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-          );
-        } else {
-          // Jika auto-confirm aktif, langsung masuk
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Akun berhasil dibuat!")),
-          );
-          // Arahkan ke rute '/' yang sekarang akan mendeteksi session dan ke Home
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      // 2. Simpan detail ke tabel 'pengguna' (Sesuai ERD)
+      if (res.user != null) {
+        await supabase.from('pengguna').insert({
+          'id_pengguna': res.user!.id, // PK: id_pengguna = UID Auth
+          'name': _nameController.text,
+          'email': _emailController.text,
+          // Field lain dari ERD bisa diisi default atau null dulu
+          'created_at': DateTime.now().toIso8601String(),
+        });
+
+        if (mounted) {
+          if (res.session == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Daftar berhasil! Cek email untuk verifikasi.")),
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Akun berhasil dibuat!")),
+            );
+            Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+          }
         }
       }
     } catch (e) {
@@ -111,7 +106,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   topRight: Radius.circular(30),
                 ),
               ),
-              // Bungkus Column dengan Form
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -124,48 +118,50 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Input Nama dengan Validasi
+                    // Input Nama
                     _buildInput(
                       "Nama", 
                       _nameController, 
                       'assets/icons/ic_user.png', 
                       false,
-                      (value) {
-                        if (value == null || value.length < 3) {
-                          return 'Nama minimal 3 huruf';
-                        }
-                        return null;
-                      }
+                      (value) => (value == null || value.length < 3) ? 'Nama minimal 3 huruf' : null
                     ),
                     const SizedBox(height: 15),
 
-                    // Input Email dengan Validasi
+                    // Input Email
                     _buildInput(
                       "Email", 
                       _emailController, 
                       'assets/icons/ic_email.png', 
                       false,
-                      (value) {
-                        if (value == null || !value.contains('@') || !value.contains('.')) {
-                          return 'Masukkan email yang valid';
-                        }
-                        return null;
-                      }
+                      (value) => (value == null || !value.contains('@')) ? 'Email tidak valid' : null
                     ),
                     const SizedBox(height: 15),
 
-                    // Input Sandi dengan Validasi
+                    // Input Sandi
                     _buildInput(
                       "Sandi", 
                       _passwordController, 
                       'assets/icons/ic_lock.png', 
                       true,
-                      (value) {
-                        if (value == null || value.length < 8) {
-                          return 'Sandi minimal 8 karakter';
-                        }
-                        return null;
-                      }
+                      (value) => (value == null || value.length < 8) ? 'Sandi minimal 8 karakter' : null
+                    ),
+                    
+                    const SizedBox(height: 10),
+                    // Checkbox & Tombol... (Bagian UI tetap sama, tidak berubah)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFF6A230),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                        ),
+                        child: _isLoading 
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text("Buat Akun", style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
                     ),
                     
                     // ... (Checkbox dan tombol sama seperti sebelumnya)
@@ -247,18 +243,12 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   // Widget Input yang diperbarui dengan Validator
-  Widget _buildInput(
-    String hint, 
-    TextEditingController controller, 
-    String iconPath, 
-    bool isPassword,
-    String? Function(String?)? validator, // Parameter validator baru
-  ) {
-    return TextFormField( // Gunakan TextFormField, bukan TextField
+  Widget _buildInput(String hint, TextEditingController controller, String iconPath, bool isPassword, String? Function(String?)? validator) {
+    return TextFormField(
       controller: controller,
       obscureText: isPassword ? _obscurePassword : false,
-      validator: validator, // Pasang validator
-      autovalidateMode: AutovalidateMode.onUserInteraction, // Validasi saat mengetik
+      validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       decoration: InputDecoration(
         hintText: hint,
         prefixIcon: Padding(
@@ -267,21 +257,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
+                icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               )
             : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
         contentPadding: const EdgeInsets.symmetric(vertical: 15),
       ),
     );

@@ -125,24 +125,24 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       if (user != null) {
         // 1. Coba ambil dari metadata auth
         final meta = user.userMetadata;
-        if (meta != null && (meta['full_name'] != null || meta['name'] != null)) {
-          name = (meta['full_name'] ?? meta['name']) as String?;
+        if (meta != null && (meta['name'] != null || meta['full_name'] != null)) {
+          name = (meta['name'] ?? meta['full_name']) as String?;
         }
 
-        // 2. Jika metadata kosong, ambil dari tabel 'profiles'
+        // 2. Jika metadata kosong, ambil dari tabel 'pengguna' (UPDATE DI SINI)
         if (name == null) {
           final data = await client
-              .from('profiles')
-              .select('full_name')
-              .eq('id', user.id)
+              .from('pengguna') // Ganti 'profiles' jadi 'pengguna'
+              .select('name')   // Ganti 'full_name' jadi 'name' (sesuai ERD)
+              .eq('id_pengguna', user.id) // Ganti 'id' jadi 'id_pengguna'
               .maybeSingle();
           
           if (data != null) {
-            name = data['full_name'] as String?;
+            name = data['name'] as String?;
           }
         }
 
-        // 3. Fallback: pakai bagian depan email
+        // 3. Fallback
         name ??= user.email?.split('@').first;
       }
 
@@ -153,6 +153,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         });
       }
     } catch (_) {
+      // Error handling
       if (mounted) {
         setState(() {
           _userName = null;
