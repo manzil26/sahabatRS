@@ -60,7 +60,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HalamanUser(),
         '/salacak': (context) => const SaLacakPage(),
 
-        // Pengantaran-darurat routes (tetap ada)
+        // Pengantaran-darurat routes 
         '/lokasi': (context) => const SadarMencariLokasi(),
         '/konfirmasi': (context) => const SadarKonfirmasi(),
         '/rating': (context) => const SadarRating(),
