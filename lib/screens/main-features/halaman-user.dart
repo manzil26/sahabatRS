@@ -443,10 +443,16 @@ class _KategoriCard extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
-            child: Image.asset(
-              assetName,
-              fit: BoxFit.cover,
-              errorBuilder: (ctx, err, stack) => const Center(child: Icon(Icons.image_not_supported)),
+              child: Padding(
+              // ⬅️ tambahin padding biar nggak mepet & nggak kelihatan kepotong
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                assetName,
+                // ⬅️ supaya gambar selalu utuh, tidak ter-crop
+                fit: BoxFit.contain,
+                errorBuilder: (ctx, err, stack) =>
+                    const Center(child: Icon(Icons.image_not_supported)),   
+             ),
             ),
           ),
         ),
@@ -468,6 +474,15 @@ class _SectionMedicalCheckup extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           color: const Color(0xFFE7F3FF),
+          // ⬇️ shadow ditambah di sini
+          boxShadow: [
+            BoxShadow(
+              // kalau mau lembut pakai opacity kecil
+              color: Colors.black.withOpacity(0.20),
+              blurRadius: 10,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -479,17 +494,28 @@ class _SectionMedicalCheckup extends StatelessWidget {
                 children: [
                   const Text(
                     'Medical Check-Up jadi\nmudah dan nyaman',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                     onPressed: () {},
-                    child: const Text('Pesan Sekarang!', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    child: const Text(
+                      'Pesan Sekarang!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -499,11 +525,15 @@ class _SectionMedicalCheckup extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Image.asset(
-                  'assets/images/card_medical_checkup.png', 
+                  'assets/images/card_medical_checkup.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (ctx, err, stack) => const Icon(Icons.local_hospital, size: 60, color: Colors.blueAccent),
+                  errorBuilder: (ctx, err, stack) => const Icon(
+                    Icons.local_hospital,
+                    size: 60,
+                    color: Colors.blueAccent,
+                  ),
                 ),
-              ), 
+              ),
             ),
           ],
         ),
