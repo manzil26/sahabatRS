@@ -4,20 +4,13 @@ import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
+import 'package:sahabat_rs/screens/main-features/riwayat-page.dart';
 
 // PERBAIKAN: Import halaman ChatPages (Daftar Pesan)
 import 'package:sahabat_rs/screens/chat/chat-pages.dart';
 
 import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
-
-// STUB / Placeholder agar tidak error
-class RiwayatPage extends StatelessWidget {
-  const RiwayatPage({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text("Halaman Riwayat")));
-}
 
 class HalamanUser extends StatefulWidget {
   const HalamanUser({super.key});
@@ -429,19 +422,19 @@ class _KategoriCard extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
+                color: Colors.black.withOpacity(0.10),
                 blurRadius: 8,
-                offset: const Offset(0, 4),
+                offset: const Offset(0, 0),
               ),
             ],
             color: Colors.grey[200],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-              child: Padding(
+            borderRadius: BorderRadius.circular(5),
+            child: Padding(
               // ⬅️ tambahin padding biar nggak mepet & nggak kelihatan kepotong
               padding: const EdgeInsets.all(8),
               child: Image.asset(
@@ -449,9 +442,8 @@ class _KategoriCard extends StatelessWidget {
                 // ⬅️ supaya gambar selalu utuh, tidak ter-crop
                 fit: BoxFit.contain,
                 errorBuilder: (ctx, err, stack) =>
-                   
-                  const Center(child: Icon(Icons.image_not_supported)),   
-             ),
+                    const Center(child: Icon(Icons.image_not_supported)),
+              ),
             ),
           ),
         ),
@@ -473,15 +465,6 @@ class _SectionMedicalCheckup extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           color: const Color(0xFFE7F3FF),
-          // ⬇️ shadow ditambah di sini
-          boxShadow: [
-            BoxShadow(
-              // kalau mau lembut pakai opacity kecil
-              color: Colors.black.withOpacity(0.20),
-              blurRadius: 10,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -493,10 +476,7 @@ class _SectionMedicalCheckup extends StatelessWidget {
                 children: [
                   const Text(
                     'Medical Check-Up jadi\nmudah dan nyaman',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
@@ -504,20 +484,12 @@ class _SectionMedicalCheckup extends StatelessWidget {
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black87,
                       shape: RoundedRectangleBorder(
-                        
-                          borderRadius: BorderRadius.circular(20),
-                      ),
+                          borderRadius: BorderRadius.circular(20)),
                     ),
                     onPressed: () {},
-                    child: const Text(
-                      'Pesan Sekarang!',
-                     
+                    child: const Text('Pesan Sekarang!',
                         style: TextStyle(
-                        
-                            fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                            fontSize: 12, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -530,13 +502,9 @@ class _SectionMedicalCheckup extends StatelessWidget {
                   'assets/images/card_medical_checkup.png',
                   fit: BoxFit.contain,
                   errorBuilder: (ctx, err, stack) => const Icon(
-                    
                       Icons.local_hospital,
-                   
                       size: 60,
-                   
-                      color: Colors.blueAccent,
-                  ),
+                      color: Colors.blueAccent),
                 ),
               ),
             ),

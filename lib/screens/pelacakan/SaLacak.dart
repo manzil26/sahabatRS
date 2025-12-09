@@ -300,7 +300,7 @@ class _SaLacakPageState extends State<SaLacakPage> {
                                       ),
                                     ),
                                   );
-                                }).toList(),
+                                }),
                               ],
                             );
                           },
@@ -360,13 +360,13 @@ class _SaLacakPageState extends State<SaLacakPage> {
                             width: 28,
                             height: 28,
                             decoration: const BoxDecoration(
-                              color: const Color(0xFF7986CB),
+                              color: Color(0xFF7986CB),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.ios_share_rounded,
                               size: 18,
-                              color: Colors.black87,
+                              color: Color.fromARGB(221, 255, 255, 255),
                             ),
                           ),
                           const SizedBox(width: 8),

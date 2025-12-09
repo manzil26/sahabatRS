@@ -71,8 +71,7 @@ Widget _buildRoundedInputField({
 class EditJadwalCheckupPage extends StatefulWidget {
   final JadwalCheckUpDetail detail; // Menerima data yang akan di-edit
 
-  const EditJadwalCheckupPage({Key? key, required this.detail})
-    : super(key: key);
+  const EditJadwalCheckupPage({super.key, required this.detail});
 
   @override
   State<EditJadwalCheckupPage> createState() => _EditJadwalCheckupPageState();

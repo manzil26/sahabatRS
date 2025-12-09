@@ -23,12 +23,12 @@ class WaktuMakanOption extends StatelessWidget {
   final String label;
 
   const WaktuMakanOption({
-    Key? key,
+    super.key,
     required this.value,
     required this.selectedValue,
     required this.onChanged,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +201,7 @@ Widget _buildIconContainer(IconData iconData) {
 class SajadEditPage extends StatefulWidget {
   final JadwalObat obat;
 
-  const SajadEditPage({Key? key, required this.obat}) : super(key: key);
+  const SajadEditPage({super.key, required this.obat});
 
   @override
   State<SajadEditPage> createState() => _SajadEditPageState();

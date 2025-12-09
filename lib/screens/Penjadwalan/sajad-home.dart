@@ -22,7 +22,7 @@ class ObatItem extends StatelessWidget {
   final JadwalObat obat;
   final VoidCallback? onEdit;
 
-  const ObatItem({Key? key, required this.obat, this.onEdit}) : super(key: key);
+  const ObatItem({super.key, required this.obat, this.onEdit});
 
   String getStatusText(bool isSelesai, TimeOfDay jam) {
     final now = DateTime.now();
@@ -146,7 +146,7 @@ class ObatItem extends StatelessWidget {
 
 // --- Halaman Utama Sajad Home ---
 class SajadHomePage extends StatefulWidget {
-  const SajadHomePage({Key? key}) : super(key: key);
+  const SajadHomePage({super.key});
 
   @override
   State<SajadHomePage> createState() => _SajadHomePageState();

@@ -20,11 +20,11 @@ class KondisiTag extends StatelessWidget {
   final Color textColor;
 
   const KondisiTag({
-    Key? key,
+    super.key,
     required this.text,
     this.color = _kuningCheckUp,
     this.textColor = Colors.black87,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +48,7 @@ class KondisiTag extends StatelessWidget {
 
 // --- Halaman Utama Jadwal Check-Up ---
 class JadwalPage extends StatefulWidget {
-  const JadwalPage({Key? key}) : super(key: key);
+  const JadwalPage({super.key});
 
   @override
   State<JadwalPage> createState() => _JadwalPageState();
@@ -297,7 +297,7 @@ class _JadwalPageState extends State<JadwalPage> {
         ).format(_selectedDay ?? DateTime.now());
 
         // Fungsi pembangun baris detail
-        Widget _buildDetailRow(String label, String value) {
+        Widget buildDetailRow(String label, String value) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Column(
@@ -373,7 +373,7 @@ class _JadwalPageState extends State<JadwalPage> {
                               MaterialPageRoute(
                                 // Menggunakan MaterialPageRoute yang benar
                                 builder: (context) => EditJadwalCheckupPage(
-                                  detail: detail!,
+                                  detail: detail,
                                 ), // Meneruskan detail non-null
                               ),
                             ).then((_) {
@@ -404,9 +404,9 @@ class _JadwalPageState extends State<JadwalPage> {
 
               if (detail != null) ...[
                 // Jika ada detail:
-                _buildDetailRow('Tanggal', formattedDate),
-                _buildDetailRow('Rumah Sakit', detail.lokasi),
-                _buildDetailRow('Kegiatan', detail.kegiatan),
+                buildDetailRow('Tanggal', formattedDate),
+                buildDetailRow('Rumah Sakit', detail.lokasi),
+                buildDetailRow('Kegiatan', detail.kegiatan),
 
                 const SizedBox(height: 15),
 
