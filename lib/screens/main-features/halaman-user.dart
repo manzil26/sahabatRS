@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// PERBAIKAN: Import intl untuk format tanggal dan halaman Jadwal untuk navigasi
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
+
+// PERBAIKAN: Import halaman ChatPages (Daftar Pesan)
+import 'package:sahabat_rs/screens/chat/chat-pages.dart'; 
 
 import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
@@ -38,11 +40,8 @@ class _HalamanUserState extends State<HalamanUser> {
         body = const RiwayatPage();
         break;
       case 2:
-        body = const _PlaceholderSection(
-          title: 'Pesan',
-          description:
-              'Halaman Pesan akan dihubungkan dengan chat / notifikasi.',
-        );
+        // PERBAIKAN: Panggil ChatPages() untuk menampilkan daftar chat
+        body = const ChatPages(); 
         break;
       case 3:
       default:
@@ -65,6 +64,7 @@ class _HalamanUserState extends State<HalamanUser> {
   }
 }
 
+// ... (Sisa kode ke bawah sama seperti sebelumnya)
 /// ======================
 /// BERANDA (FITUR UTAMA)
 /// ======================
@@ -124,13 +124,11 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       String? name;
 
       if (user != null) {
-        // 1. Coba ambil dari metadata auth
         final meta = user.userMetadata;
         if (meta != null && (meta['name'] != null || meta['full_name'] != null)) {
           name = (meta['name'] ?? meta['full_name']) as String?;
         }
 
-        // 2. Jika metadata kosong, ambil dari tabel 'pengguna'
         if (name == null) {
           final data = await client
               .from('pengguna')
@@ -143,7 +141,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
           }
         }
 
-        // 3. Fallback
         name ??= user.email?.split('@').first;
       }
 
@@ -154,7 +151,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         });
       }
     } catch (_) {
-      // Error handling
       if (mounted) {
         setState(() {
           _userName = null;
@@ -178,7 +174,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       height: 185,
       child: Stack(
         children: [
-          // background ungu
           Container(
             height: 140,
             decoration: const BoxDecoration(
@@ -664,7 +659,6 @@ class _SectionJadwal extends StatelessWidget {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
               ),
-              // PERBAIKAN: Tombol Lihat Semua berfungsi
               InkWell(
                 onTap: () {
                   Navigator.push(
@@ -697,7 +691,6 @@ class _SectionJadwal extends StatelessWidget {
               ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 10),
-            // PERBAIKAN: Menggunakan FutureBuilder untuk data asli
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: _fetchUpcomingCheckups(),
               builder: (context, snapshot) {

@@ -1,262 +1,154 @@
 import 'package:flutter/material.dart';
+import 'chat-sadamp.dart'; // Import halaman detail chat
 
-// Model Pesan Lokal (Bisa dipisah ke file models jika ingin clean code)
-class ChatMessage {
-  final String text;
-  final bool isMe;
-  final String time;
-  final bool isRead;
-
-  ChatMessage({
-    required this.text,
-    required this.isMe,
-    required this.time,
-    this.isRead = false,
-  });
-}
-
-class ChatSadamp extends StatefulWidget {
-  final String userName;
-  final String? profileImage;
-
-  const ChatSadamp({
-    super.key,
-    required this.userName,
-    this.profileImage,
-  });
-
-  @override
-  State<ChatSadamp> createState() => _ChatSadampState();
-}
-
-class _ChatSadampState extends State<ChatSadamp> {
-  final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  bool _isTyping = false;
-
-  final List<ChatMessage> _messages = [
-    ChatMessage(
-        text: "Halo, ada yang bisa kami bantu?", isMe: false, time: "08.00"),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _messageController.addListener(() {
-      setState(() {
-        _isTyping = _messageController.text.isNotEmpty;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
-    setState(() {
-      _messages.add(ChatMessage(
-        text: _messageController.text.trim(),
-        isMe: true,
-        time: "Now",
-        isRead: false,
-      ));
-      _messageController.clear();
-      _isTyping = false;
-    });
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    });
-  }
+class ChatPages extends StatelessWidget {
+  const ChatPages({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const Color orangeAksen = Color(0xFFF6A230);
-    const Color creamBackground = Color(0xFFFFF8E1);
-    const Color blueInput = Color(0xFF5966B1);
+    // Dummy data untuk daftar chat
+    final List<Map<String, dynamic>> chatList = [
+      {
+        "name": "Esa Anugrah",
+        "role": "Driver Ambulance",
+        "message": "Saya sudah sampai di depan pak...",
+        "time": "10:30",
+        "unread": 2,
+        "image": "assets/images/driver.png" 
+      },
+      {
+        "name": "Siti Aminah",
+        "role": "Perawat Pendamping",
+        "message": "Baik bu, jangan lupa obatnya dim...",
+        "time": "Kemarin",
+        "unread": 0,
+        "image": "assets/images/nurse.png"
+      },
+    ];
 
     return Scaffold(
-      backgroundColor: creamBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.orange),
-          onPressed: () => Navigator.pop(context),
-        ),
-        titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: widget.profileImage != null
-                  ? AssetImage(widget.profileImage!)
-                  : const AssetImage('assets/icons/ic_user.png'),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      widget.userName,
-                      style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.verified, color: Colors.blue, size: 16),
-                  ],
-                ),
-                const Text('Official Account',
-                    style: TextStyle(color: Colors.grey, fontSize: 12)),
-              ],
-            ),
-          ],
+        elevation: 0,
+        automaticallyImplyLeading: false, 
+        title: const Text(
+          "Pesan",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
         ),
         actions: [
-          // Hanya tombol Info untuk akun Official
           IconButton(
-              icon: const Icon(Icons.info_outline, color: blueInput),
-              onPressed: () {}),
+            icon: const Icon(Icons.search, color: Colors.grey),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.grey),
+            onPressed: () {},
+          ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) =>
-                  _buildChatBubble(_messages[index]),
-            ),
-          ),
-          _buildInputArea(blueInput, orangeAksen),
-        ],
+      body: ListView.builder(
+        itemCount: chatList.length,
+        itemBuilder: (context, index) {
+          final chat = chatList[index];
+          return _buildChatItem(context, chat);
+        },
       ),
     );
   }
 
-  Widget _buildInputArea(Color blueInput, Color orangeAksen) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      color: blueInput,
-      child: SafeArea(
+  Widget _buildChatItem(BuildContext context, Map<String, dynamic> chat) {
+    return InkWell(
+      onTap: () {
+        // Navigasi ke Ruang Chat (ChatPendamping)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatPendamping(
+              userName: chat['name'], // Mengirim nama ke ChatPendamping
+              profileImage: chat['image'],
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           children: [
-            IconButton(
-                icon: const Icon(Icons.add_circle_outline,
-                    color: Colors.white, size: 28),
-                onPressed: () {}),
+            // Avatar
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: Colors.grey[200],
+              backgroundImage: AssetImage(chat['image']),
+              onBackgroundImageError: (_, __) {}, 
+              child: const Icon(Icons.person, color: Colors.grey),
+            ),
+            const SizedBox(width: 16),
+            
+            // Nama & Pesan
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(24)),
-                child: TextField(
-                  controller: _messageController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    hintText: "Tulis Pesan...",
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    suffixIcon: Icon(Icons.camera_alt, color: Colors.white70),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    chat['name'],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Text(
+                    chat['message'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: chat['unread'] > 0 ? Colors.black87 : Colors.grey,
+                      fontWeight: chat['unread'] > 0 ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(width: 10),
-            GestureDetector(
-              onTap: _isTyping ? _sendMessage : () {},
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                    color: _isTyping ? Colors.blue : orangeAksen,
-                    shape: BoxShape.circle),
-                child: Icon(_isTyping ? Icons.send : Icons.mic,
-                    color: Colors.white, size: 24),
-              ),
+
+            // Waktu & Badge Unread
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  chat['time'],
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: chat['unread'] > 0 ? const Color(0xFFFFAA2B) : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                if (chat['unread'] > 0)
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFAA2B), // Warna Orange
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      chat['unread'].toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildChatBubble(ChatMessage message) {
-    const Color bubbleUser = Color(0xFFF6A230);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment:
-            message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75),
-            decoration: BoxDecoration(
-              color: message.isMe ? bubbleUser : Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft:
-                    message.isMe ? const Radius.circular(16) : Radius.zero,
-                bottomRight:
-                    message.isMe ? Radius.zero : const Radius.circular(16),
-              ),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    offset: const Offset(0, 2),
-                    blurRadius: 4)
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(message.text,
-                    style: TextStyle(
-                        fontSize: 15,
-                        color: message.isMe ? Colors.black : Colors.black87)),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(message.time,
-                        style: TextStyle(
-                            fontSize: 10,
-                            color:
-                                message.isMe ? Colors.black54 : Colors.grey)),
-                    if (message.isMe) ...[
-                      const SizedBox(width: 4),
-                      Icon(Icons.done_all,
-                          size: 14,
-                          color: message.isRead
-                              ? Colors.blue[800]
-                              : Colors.black54),
-                    ]
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
