@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sahabat_rs/screens/pengantaran-darurat/SaDar - Rating.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class SadarPengantaranSelesai extends StatelessWidget {
   const SadarPengantaranSelesai({super.key});
@@ -9,7 +10,19 @@ class SadarPengantaranSelesai extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: Colors.grey.shade300),
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(-7.2756, 112.6426),
+              initialZoom: 15,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: "com.example.sahabat_rs",
+              ),
+            ],
+          ),
 
           Align(
             alignment: Alignment.bottomCenter,
@@ -24,8 +37,7 @@ class SadarPengantaranSelesai extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     radius: 35,
-                    child: Icon(Icons.person, size: 40),
-                    // backgroundImage: AssetImage("assets/driver.png"),
+                    backgroundImage: AssetImage("assets/driver.png"),
                   ),
                   const SizedBox(height: 10),
                   const Text("Esa Anugrah",
@@ -36,17 +48,11 @@ class SadarPengantaranSelesai extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Navigasi ke Rating
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SadarRating()),
-                        );
-                      },
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                       ),
-                      child: const Text("Pengantaran Selesai", style: TextStyle(color: Colors.white)),
+                      child: const Text("Pengantaran Selesai"),
                     ),
                   )
                 ],

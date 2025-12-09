@@ -6,7 +6,11 @@ import 'package:sahabat_rs/screens/auth/login-page.dart';
 import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
 import 'package:sahabat_rs/screens/main-features/welcome-page.dart';
 import 'package:sahabat_rs/screens/pelacakan/SaLacak.dart';
-
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pemesanan.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_mencari_lokasi.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_konfirmasi.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_rating.dart';
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pengantaran_selesai.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +59,12 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/home': (context) => const HalamanUser(),
         '/salacak': (context) => const SaLacakPage(),
+
+        // Pengantaran-darurat routes (tetap ada)
+        '/lokasi': (context) => const SadarMencariLokasi(),
+        '/konfirmasi': (context) => const SadarKonfirmasi(),
+        '/rating': (context) => const SadarRating(),
+        '/selesai': (context) => const SadarPengantaranSelesai(),
       },
     );
   }

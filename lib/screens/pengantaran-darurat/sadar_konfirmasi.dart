@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sahabat_rs/screens/pengantaran-darurat/saDar-pengantaran-selesai.dart';
-import 'package:sahabat_rs/screens/pelacakan/SaLacak-Tracking.dart'; // TAMBAH untuk tracking
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class SadarKonfirmasi extends StatelessWidget {
   const SadarKonfirmasi({super.key});
@@ -10,27 +10,36 @@ class SadarKonfirmasi extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: Colors.grey.shade300),
+          FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(-7.2756, 112.6426),
+              initialZoom: 15,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: "com.example.sahabat_rs",
+              ),
+            ],
+          ),
 
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              height: 320, // Sedikit ditinggikan agar muat
+              height: 300,
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
                       const CircleAvatar(
                         radius: 35,
-                        // Pastikan asset ini ada, atau ganti icon
-                        child: Icon(Icons.person, size: 40), 
-                        // backgroundImage: AssetImage("assets/driver.png"), 
+                        backgroundImage: AssetImage("assets/driver.png"),
                       ),
                       const SizedBox(width: 15),
                       Column(
@@ -42,20 +51,13 @@ class SadarKonfirmasi extends StatelessWidget {
                           Text("Ambulance"),
                           Row(
                             children: [
-                              Icon(Icons.star, color: Colors.amber, size: 18),
+                              Icon(Icons.star,
+                                  color: Colors.amber, size: 18),
                               Text(" 5.0"),
                             ],
-                          )
+                          ),
                         ],
                       ),
-                      const Spacer(),
-                      Row(
-                        children: const [
-                          Icon(Icons.call, size: 28, color: Colors.green),
-                          SizedBox(width: 10),
-                          Icon(Icons.message, size: 28, color: Colors.blue),
-                        ],
-                      )
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -71,20 +73,10 @@ class SadarKonfirmasi extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Navigasi ke Pengantaran Selesai
-                        //Navigator.pushReplacement(
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  //const SadarPengantaranSelesai()), //punya nabb aku koment sementara 
-                                  const SaLacakTrackingPage()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange),
-                      child: const Text("Lacak Pendampingan", style: TextStyle(color: Colors.white)),
+                      onPressed: () {},
+                      style:
+                          ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                      child: const Text("Lacak Pendampingan"),
                     ),
                   )
                 ],
