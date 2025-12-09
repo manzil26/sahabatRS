@@ -42,7 +42,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
     }
   }
 
-  /// 📍 Select hasil search
+  /// 📍 Select lokasi
   void selectLocation(dynamic place) {
     final lat = double.parse(place["lat"]);
     final lon = double.parse(place["lon"]);
@@ -66,7 +66,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
     }
   }
 
-  /// 🚗 Mendapatkan rute dari OSRM (jalan asli, bukan garis lurus)
+  /// 🚗 Ambil rute OSRM
   Future<void> getRouteOSRM() async {
     final url = Uri.parse(
       "https://router.project-osrm.org/route/v1/driving/"
@@ -79,18 +79,16 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-
       final coords = data["routes"][0]["geometry"]["coordinates"];
 
-      List<LatLng> polyPoints = coords
-          .map<LatLng>((c) => LatLng(c[1].toDouble(), c[0].toDouble()))
-          .toList();
+      List<LatLng> polyPoints =
+          coords.map<LatLng>((c) => LatLng(c[1], c[0])).toList();
 
       setState(() => routeLine = polyPoints);
     }
   }
 
-  /// 🧡 Popup driver ketika klik "Pesan"
+  /// 🧡 Popup driver
   void showDriverPopup() {
     showModalBottomSheet(
       context: context,
@@ -143,10 +141,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Tutup",
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: const Text("Tutup", style: TextStyle(fontSize: 18)),
               ),
             )
           ],
@@ -196,7 +191,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                 userAgentPackageName: "com.example.sahabat_rs",
               ),
 
-              /// 🔵 RUTE OSRM
+              /// 🔵 Jalur
               if (routeLine.isNotEmpty)
                 PolylineLayer(
                   polylines: [
@@ -208,7 +203,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ],
                 ),
 
-              /// MARKER PICKUP
+              /// Marker pickup
               if (pickup != null)
                 MarkerLayer(
                   markers: [
@@ -222,7 +217,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ],
                 ),
 
-              /// MARKER DESTINATION
+              /// Marker destination
               if (destination != null)
                 MarkerLayer(
                   markers: [
@@ -238,7 +233,30 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
             ],
           ),
 
-          /// 🔍 SEARCH RESULT LIST
+          // ⬅️ TOMBOL BACK (MIRIP DESAIN)
+          Positioned(
+            top: 50,
+            left: 20,
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 6,
+                    )
+                  ],
+                ),
+                child: const Icon(Icons.arrow_back, size: 28),
+              ),
+            ),
+          ),
+
+          /// 🔍 Search hasil
           if (searchResults.isNotEmpty)
             Positioned(
               left: 15,
@@ -265,7 +283,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
               ),
             ),
 
-          /// 🟧 PANEL BAWAH (INPUT + BUTTON)
+          /// 🟧 Panel bawah
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -290,6 +308,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 10),
 
                   TextField(
@@ -309,9 +328,8 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   const SizedBox(height: 20),
 
                   ElevatedButton(
-                    onPressed: (pickup != null && destination != null)
-                        ? showDriverPopup
-                        : null,
+                    onPressed:
+                        (pickup != null && destination != null) ? showDriverPopup : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       minimumSize: const Size(double.infinity, 55),
