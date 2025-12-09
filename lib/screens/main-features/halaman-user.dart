@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
 
 // PERBAIKAN: Import halaman ChatPages (Daftar Pesan)
-import 'package:sahabat_rs/screens/chat/chat-pages.dart'; 
+import 'package:sahabat_rs/screens/chat/chat-pages.dart';
 
 import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
@@ -15,7 +15,8 @@ import '../pendampingan/pilih_kendaraan.dart';
 class RiwayatPage extends StatelessWidget {
   const RiwayatPage({super.key});
   @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text("Halaman Riwayat")));
+  Widget build(BuildContext context) =>
+      const Scaffold(body: Center(child: Text("Halaman Riwayat")));
 }
 
 class HalamanUser extends StatefulWidget {
@@ -41,7 +42,7 @@ class _HalamanUserState extends State<HalamanUser> {
         break;
       case 2:
         // PERBAIKAN: Panggil ChatPages() untuk menampilkan daftar chat
-        body = const ChatPages(); 
+        body = const ChatPages();
         break;
       case 3:
       default:
@@ -125,7 +126,8 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
 
       if (user != null) {
         final meta = user.userMetadata;
-        if (meta != null && (meta['name'] != null || meta['full_name'] != null)) {
+        if (meta != null &&
+            (meta['name'] != null || meta['full_name'] != null)) {
           name = (meta['name'] ?? meta['full_name']) as String?;
         }
 
@@ -135,7 +137,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
               .select('name')
               .eq('id_pengguna', user.id)
               .maybeSingle();
-          
+
           if (data != null) {
             name = data['name'] as String?;
           }
@@ -199,7 +201,8 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                       fit: BoxFit.cover,
                       height: 44,
                       width: 44,
-                      errorBuilder: (ctx, err, stack) => Icon(Icons.person, color: Colors.grey[400]),
+                      errorBuilder: (ctx, err, stack) =>
+                          Icon(Icons.person, color: Colors.grey[400]),
                     ),
                   ),
                 ),
@@ -270,7 +273,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                       Navigator.of(context).pushReplacementNamed('/');
                     }
                   },
-                   icon: const Icon(
+                  icon: const Icon(
                     Icons.logout,
                     color: Color(0xFFFFC63A),
                     size: 26,
@@ -370,7 +373,7 @@ class _SectionKategoriLayanan extends StatelessWidget {
                 child: _KategoriCard(
                   title: 'Pesan Pendamping',
                   gradientColors: [Color(0xFF5D79FF), Color(0xFF4C64F0)],
-                  assetName: 'assets/images/pesanpendamping.png', 
+                  assetName: 'assets/images/pesanpendamping.png',
                   isEmergency: false,
                 ),
               ),
@@ -379,7 +382,7 @@ class _SectionKategoriLayanan extends StatelessWidget {
                 child: _KategoriCard(
                   title: 'Darurat',
                   gradientColors: [Color(0xFFFFC63A), Color(0xFFFF8A45)],
-                  assetName: 'assets/images/card_darurat.png', 
+                  assetName: 'assets/images/card_darurat.png',
                   isEmergency: true,
                 ),
               ),
@@ -434,14 +437,15 @@ class _KategoriCard extends StatelessWidget {
                 offset: const Offset(0, 4),
               ),
             ],
-            color: Colors.grey[200], 
+            color: Colors.grey[200],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: Image.asset(
               assetName,
               fit: BoxFit.cover,
-              errorBuilder: (ctx, err, stack) => const Center(child: Icon(Icons.image_not_supported)),
+              errorBuilder: (ctx, err, stack) =>
+                  const Center(child: Icon(Icons.image_not_supported)),
             ),
           ),
         ),
@@ -481,10 +485,13 @@ class _SectionMedicalCheckup extends StatelessWidget {
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black87,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
                     ),
                     onPressed: () {},
-                    child: const Text('Pesan Sekarang!', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    child: const Text('Pesan Sekarang!',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),
@@ -494,11 +501,14 @@ class _SectionMedicalCheckup extends StatelessWidget {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Image.asset(
-                  'assets/images/card_medical_checkup.png', 
+                  'assets/images/card_medical_checkup.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (ctx, err, stack) => const Icon(Icons.local_hospital, size: 60, color: Colors.blueAccent),
+                  errorBuilder: (ctx, err, stack) => const Icon(
+                      Icons.local_hospital,
+                      size: 60,
+                      color: Colors.blueAccent),
                 ),
-              ), 
+              ),
             ),
           ],
         ),
@@ -534,7 +544,8 @@ class _SectionLayananLain extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SajadHomePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const SajadHomePage()),
                     );
                   },
                   child: Column(
@@ -548,12 +559,14 @@ class _SectionLayananLain extends StatelessWidget {
                         ),
                         padding: const EdgeInsets.all(12),
                         child: Image.asset(
-                          'assets/images/ic_jadwal.png', 
+                          'assets/images/ic_jadwal.png',
                           fit: BoxFit.contain,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text('Jadwal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      const Text('Jadwal',
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
@@ -582,7 +595,8 @@ class _LayananLainItem extends StatelessWidget {
   final String assetPath;
   final VoidCallback? onTap;
 
-  const _LayananLainItem({required this.label, required this.assetPath, this.onTap});
+  const _LayananLainItem(
+      {required this.label, required this.assetPath, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -599,13 +613,13 @@ class _LayananLainItem extends StatelessWidget {
                 color: const Color(0xFFF5F6FA),
                 borderRadius: BorderRadius.circular(20),
               ),
-            padding: const EdgeInsets.all(12),
-            child: Image.asset(assetPath, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              padding: const EdgeInsets.all(12),
+              child: Image.asset(assetPath, fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -626,7 +640,7 @@ class _SectionJadwal extends StatelessWidget {
       if (user == null) return [];
 
       final today = DateTime.now().toIso8601String().split('T')[0];
-      
+
       // Ambil 2 jadwal terdekat mulai dari hari ini
       final response = await supabase
           .from('checkup')
@@ -635,7 +649,7 @@ class _SectionJadwal extends StatelessWidget {
           .gte('tanggal', today)
           .order('tanggal', ascending: true)
           .limit(2);
-      
+
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       debugPrint("Error fetching home checkups: $e");
@@ -667,12 +681,11 @@ class _SectionJadwal extends StatelessWidget {
                   );
                 },
                 child: const Text(
-                  'Lihat Semua', 
+                  'Lihat Semua',
                   style: TextStyle(
-                    fontSize: 12, 
-                    color: Color(0xFFFFAA2B), 
-                    fontWeight: FontWeight.w600
-                  ),
+                      fontSize: 12,
+                      color: Color(0xFFFFAA2B),
+                      fontWeight: FontWeight.w600),
                 ),
               ),
             ],
@@ -684,10 +697,9 @@ class _SectionJadwal extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06), 
-                  blurRadius: 10, 
-                  offset: const Offset(0, 4)
-                ),
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4)),
               ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -697,18 +709,22 @@ class _SectionJadwal extends StatelessWidget {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2)),
                   );
                 }
                 if (snapshot.hasError) {
                   return const Padding(
                     padding: EdgeInsets.all(20),
-                    child: Center(child: Text("Gagal memuat jadwal", style: TextStyle(color: Colors.grey, fontSize: 12))),
+                    child: Center(
+                        child: Text("Gagal memuat jadwal",
+                            style:
+                                TextStyle(color: Colors.grey, fontSize: 12))),
                   );
                 }
-                
+
                 final data = snapshot.data ?? [];
-                
+
                 if (data.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.all(20),
@@ -726,7 +742,8 @@ class _SectionJadwal extends StatelessWidget {
                   children: List.generate(data.length, (index) {
                     final item = data[index];
                     final date = DateTime.parse(item['tanggal']);
-                    final formattedDate = DateFormat('dd MMMM yyyy', 'id_ID').format(date);
+                    final formattedDate =
+                        DateFormat('dd MMMM yyyy', 'id_ID').format(date);
                     final deskripsi = "${item['kegiatan']} - ${item['lokasi']}";
 
                     return Column(
@@ -766,17 +783,23 @@ class _JadwalRow extends StatelessWidget {
           Container(
             width: 32,
             height: 32,
-            decoration: const BoxDecoration(color: Color(0xFFFFC63A), shape: BoxShape.circle),
-            child: const Icon(Icons.event_rounded, size: 18, color: Colors.white),
+            decoration: const BoxDecoration(
+                color: Color(0xFFFFC63A), shape: BoxShape.circle),
+            child:
+                const Icon(Icons.event_rounded, size: 18, color: Colors.white),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tanggal, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                Text(tanggal,
+                    style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(deskripsi, style: const TextStyle(fontSize: 11, color: Color(0xFF7F8C8D))),
+                Text(deskripsi,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF7F8C8D))),
               ],
             ),
           ),
@@ -791,7 +814,15 @@ class _PlaceholderSection extends StatelessWidget {
   final String description;
   const _PlaceholderSection({required this.title, required this.description});
   @override
-  Widget build(BuildContext context) => Center(child: Column(mainAxisSize: MainAxisSize.min, children: [Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)), const SizedBox(height: 12), Text(description, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey))]));
+  Widget build(BuildContext context) => Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(title,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Text(description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.grey))
+      ]));
 }
 
 class _CustomBottomNavBar extends StatelessWidget {
@@ -802,15 +833,38 @@ class _CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: Color(0xFF4C4F99), borderRadius: BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24))),
+      decoration: const BoxDecoration(
+          color: Color(0xFF4C4F99),
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24), topRight: Radius.circular(24))),
       padding: const EdgeInsets.fromLTRB(24, 8, 24, 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _NavItem(index: 0, currentIndex: currentIndex, icon: Icons.home_rounded, label: 'Beranda', onTap: onTap),
-          _NavItem(index: 1, currentIndex: currentIndex, icon: Icons.history_rounded, label: 'Riwayat', onTap: onTap),
-          _NavItem(index: 2, currentIndex: currentIndex, icon: Icons.chat_bubble_outline_rounded, label: 'Pesan', onTap: onTap),
-          _NavItem(index: 3, currentIndex: currentIndex, icon: Icons.person_outline_rounded, label: 'Profil', onTap: onTap),
+          _NavItem(
+              index: 0,
+              currentIndex: currentIndex,
+              icon: Icons.home_rounded,
+              label: 'Beranda',
+              onTap: onTap),
+          _NavItem(
+              index: 1,
+              currentIndex: currentIndex,
+              icon: Icons.history_rounded,
+              label: 'Riwayat',
+              onTap: onTap),
+          _NavItem(
+              index: 2,
+              currentIndex: currentIndex,
+              icon: Icons.chat_bubble_outline_rounded,
+              label: 'Pesan',
+              onTap: onTap),
+          _NavItem(
+              index: 3,
+              currentIndex: currentIndex,
+              icon: Icons.person_outline_rounded,
+              label: 'Profil',
+              onTap: onTap),
         ],
       ),
     );
@@ -823,7 +877,12 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final ValueChanged<int> onTap;
-  const _NavItem({required this.index, required this.currentIndex, required this.icon, required this.label, required this.onTap});
+  const _NavItem(
+      {required this.index,
+      required this.currentIndex,
+      required this.icon,
+      required this.label,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -832,10 +891,23 @@ class _NavItem extends StatelessWidget {
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        if (selected) Container(width: 40, height: 40, decoration: const BoxDecoration(color: Color(0xFFFFAA2B), shape: BoxShape.circle), child: Icon(icon, color: Colors.white, size: 22))
-        else Icon(icon, color: const Color(0xFFE0E0E0), size: 24),
+        if (selected)
+          Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                  color: Color(0xFFFFAA2B), shape: BoxShape.circle),
+              child: Icon(icon, color: Colors.white, size: 22))
+        else
+          Icon(icon, color: const Color(0xFFE0E0E0), size: 24),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: selected ? const Color(0xFFFFAA2B) : const Color(0xFFE0E0E0))),
+        Text(label,
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: selected
+                    ? const Color(0xFFFFAA2B)
+                    : const Color(0xFFE0E0E0))),
       ]),
     );
   }
