@@ -21,13 +21,13 @@ class WaktuMakanOption extends StatelessWidget {
   final String label;
 
   const WaktuMakanOption({
-    Key? key,
+    super.key,
     required this.value,
     required this.selectedValue,
     required this.onChanged,
     required this.assetPath,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +143,7 @@ Widget _buildRoundedInputField({
 }
 
 class SajadTambahPage extends StatefulWidget {
-  const SajadTambahPage({Key? key}) : super(key: key);
+  const SajadTambahPage({super.key});
 
   @override
   State<SajadTambahPage> createState() => _SajadTambahPageState();
@@ -278,7 +278,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
   }
 
   Widget _buildJumlahDanDurasi() {
-    void _onChanged(dynamic newValue, String type) {
+    void onChanged(dynamic newValue, String type) {
       setState(() {
         if (type == 'jumlah') {
           _jumlahObat = int.parse(newValue);
@@ -290,7 +290,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
       });
     }
 
-    Widget _buildDropdownContainer({
+    Widget buildDropdownContainer({
       required Widget child,
       double width = 80, 
     }) {
@@ -346,13 +346,13 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         const SizedBox(height: 10),
         Row(
           children: <Widget>[
-            _buildDropdownContainer(
+            buildDropdownContainer(
               width: 50,
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _jumlahObat.toString(),
                   items: jumlahItems,
-                  onChanged: (newValue) => _onChanged(newValue, 'jumlah'),
+                  onChanged: (newValue) => onChanged(newValue, 'jumlah'),
                   isDense: true,
                   icon: const Icon(Icons.keyboard_arrow_down, size: 20),
                   style: const TextStyle(
@@ -365,13 +365,13 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             ),
             const SizedBox(width: 10),
 
-            _buildDropdownContainer(
+            buildDropdownContainer(
               width: 80, 
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _jenisJumlah,
                   items: jenisItems,
-                  onChanged: (newValue) => _onChanged(newValue, 'jenis'),
+                  onChanged: (newValue) => onChanged(newValue, 'jenis'),
                   isDense: true,
                   icon: const Icon(Icons.keyboard_arrow_down, size: 20),
                   style: const TextStyle(color: _inputTextColor, fontSize: 16),
@@ -396,13 +396,13 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
             const SizedBox(width: 10),
 
-            _buildDropdownContainer(
+            buildDropdownContainer(
               width: 60,
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _durasiHari.toString(),
                   items: durasiItems,
-                  onChanged: (newValue) => _onChanged(newValue, 'durasi'),
+                  onChanged: (newValue) => onChanged(newValue, 'durasi'),
                   isDense: true,
                   icon: const Icon(Icons.keyboard_arrow_down, size: 20),
                   style: const TextStyle(

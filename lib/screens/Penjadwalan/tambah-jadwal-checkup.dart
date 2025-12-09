@@ -72,7 +72,7 @@ Widget _buildRoundedInputField({
 
 // --- Halaman Tambah Jadwal Check-Up ---
 class TambahJadwalCheckupPage extends StatefulWidget {
-  const TambahJadwalCheckupPage({Key? key}) : super(key: key);
+  const TambahJadwalCheckupPage({super.key});
 
   @override
   State<TambahJadwalCheckupPage> createState() =>

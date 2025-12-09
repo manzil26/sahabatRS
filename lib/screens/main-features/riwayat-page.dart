@@ -1,138 +1,212 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:sahabat_rs/screens/pendampingan/pilih_kendaraan.dart';
 
-class RiwayatPage extends StatelessWidget {
+class RiwayatPage extends StatefulWidget {
   const RiwayatPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final riwayatList = [
-      const _RiwayatItemData(
-        tanggal: '10 Sep, 11:30',
-        namaRs: 'RS Hangtuah',
-        status: 'Pendampingan Selesai',
-        isDibatalkan: false,
-      ),
-      const _RiwayatItemData(
-        tanggal: '9 Sep, 09:20',
-        namaRs: 'RS Unair',
-        status: 'Pendampingan Selesai',
-        isDibatalkan: false,
-      ),
-      const _RiwayatItemData(
-        tanggal: '8 Sep, 14:50',
-        namaRs: 'RS Soetomo',
-        status: 'Pendampingan Dibatalkan',
-        isDibatalkan: true,
-      ),
-      const _RiwayatItemData(
-        tanggal: '8 Sep, 11:30',
-        namaRs: 'RS NU',
-        status: 'Pendampingan Selesai',
-        isDibatalkan: false,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // HEADER
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-          child: Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Riwayat',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.help_outline, size: 22),
-              ),
-            ],
-          ),
-        ),
-
-        // TAB Selesai / Dibatalkan (dummy, belum filter)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF1F2F6),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            padding: const EdgeInsets.all(4),
-            child: Row(
-              children: const [
-                _SegmentTab(
-                  label: 'Selesai',
-                  selected: true,
-                ),
-                _SegmentTab(
-                  label: 'Dibatalkan',
-                  selected: false,
-                ),
-              ],
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // LIST RIWAYAT
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: riwayatList.length,
-            itemBuilder: (context, index) {
-              final item = riwayatList[index];
-              return _RiwayatCard(item: item);
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  State<RiwayatPage> createState() => _RiwayatPageState();
 }
 
-class _SegmentTab extends StatelessWidget {
-  final String label;
-  final bool selected;
+class _RiwayatPageState extends State<RiwayatPage> {
+  String _selectedTab = 'selesai'; // 'selesai' atau 'dibatalkan';
+  late Future<List<_RiwayatItemData>> _futureRiwayat;
 
-  const _SegmentTab({
-    required this.label,
-    required this.selected,
-  });
+  @override
+  void initState() {
+    super.initState();
+    _futureRiwayat = _fetchRiwayat();
+  }
+
+  Future<List<_RiwayatItemData>> _fetchRiwayat() async {
+    final supabase = Supabase.instance.client;
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      // belum login
+      return [];
+    }
+
+    final data = await supabase
+        .from('riwayatpesanan')
+        .select(
+          'id_riwayatpesanan, tanggal_waktu, nama_tempat, '
+          'status_pendampingan, bisa_pesan_lagi, kategori_riwayat',
+        )
+        .eq('id_pengguna', user.id)
+        .order('tanggal_waktu', ascending: false);
+
+    return (data as List<dynamic>).map((row) {
+      final map = row as Map<String, dynamic>;
+
+      final tanggalRaw = map['tanggal_waktu'] as String?;
+      DateTime? tanggalDt;
+      if (tanggalRaw != null) {
+        tanggalDt = DateTime.parse(tanggalRaw);
+      }
+
+      final String tanggalFormatted = tanggalDt != null
+          ? DateFormat('d MMM, HH:mm').format(tanggalDt)
+          : '-';
+
+      final String namaTempat = (map['nama_tempat'] as String?) ?? '-';
+
+      final String statusEnum =
+          (map['status_pendampingan'] as String?) ?? 'selesai';
+
+      // mapping enum -> text untuk di UI
+      String statusText;
+      switch (statusEnum) {
+        case 'selesai':
+          statusText = 'Pendampingan Selesai';
+          break;
+        case 'dibatalkan':
+          statusText = 'Pendampingan Dibatalkan';
+          break;
+        case 'diminta':
+          statusText = 'Permintaan Diproses';
+          break;
+        case 'dijemput':
+          statusText = 'Pendamping Sedang Dijemput';
+          break;
+        case 'di_rs':
+          statusText = 'Pendampingan Berlangsung';
+          break;
+        default:
+          statusText = 'Status Tidak Diketahui';
+      }
+
+      final bool isDibatalkan = statusEnum == 'dibatalkan';
+
+      return _RiwayatItemData(
+        tanggal: tanggalFormatted,
+        namaRs: namaTempat,
+        status: statusText,
+        isDibatalkan: isDibatalkan,
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Riwayat',
           style: TextStyle(
-            fontSize: 13,
+            color: Color(0xFF2C3E50),
             fontWeight: FontWeight.w600,
-            color: selected
-                ? const Color(0xFFFF9F1C)
-                : const Color(0xFF7F8C8D),
           ),
         ),
+        centerTitle: false,
+        actions: const [
+          Icon(Icons.help_outline, color: Color(0xFF6C7A89)),
+          SizedBox(width: 8),
+          Icon(Icons.download_rounded, color: Color(0xFF6C7A89)),
+          SizedBox(width: 16),
+        ],
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+
+          // Segmented tab Selesai / Dibatalkan
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F2F6),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  _SegmentTab(
+                    label: 'Selesai',
+                    selected: _selectedTab == 'selesai',
+                    onTap: () {
+                      setState(() {
+                        _selectedTab = 'selesai';
+                      });
+                    },
+                  ),
+                  _SegmentTab(
+                    label: 'Dibatalkan',
+                    selected: _selectedTab == 'dibatalkan',
+                    onTap: () {
+                      setState(() {
+                        _selectedTab = 'dibatalkan';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // LIST RIWAYAT
+          Expanded(
+            child: FutureBuilder<List<_RiwayatItemData>>(
+              future: _futureRiwayat,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Gagal memuat riwayat.\n${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  );
+                }
+
+                var list = snapshot.data ?? [];
+
+                // filter sesuai tab
+                if (_selectedTab == 'selesai') {
+                  list = list.where((e) => !e.isDibatalkan).toList();
+                } else {
+                  list = list.where((e) => e.isDibatalkan).toList();
+                }
+
+                if (list.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'Belum ada riwayat pendampingan.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  itemCount: list.length,
+                  itemBuilder: (context, index) {
+                    return _RiwayatCard(item: list[index]);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+
+// ====== MODEL DATA UNTUK UI ======
 
 class _RiwayatItemData {
   final String tanggal;
@@ -148,6 +222,8 @@ class _RiwayatItemData {
   });
 }
 
+// ====== WIDGET KARTU RIWAYAT ======
+
 class _RiwayatCard extends StatelessWidget {
   final _RiwayatItemData item;
 
@@ -155,9 +231,8 @@ class _RiwayatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = item.isDibatalkan
-        ? const Color(0xFFE74C3C)
-        : const Color(0xFF27AE60);
+    final statusColor =
+        item.isDibatalkan ? const Color(0xFFE74C3C) : const Color(0xFF27AE60);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -175,7 +250,7 @@ class _RiwayatCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon RS / kendaraan (nanti bisa diganti asset Figma)
+          // Icon RS/kendaraan (sementara icon default)
           Container(
             width: 48,
             height: 48,
@@ -202,8 +277,9 @@ class _RiwayatCard extends StatelessWidget {
                 Text(
                   item.namaRs,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2C3E50),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -230,20 +306,24 @@ class _RiwayatCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFF9F1C),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PilihKendaraanPage(),
+              ),
+            );
+            },
+            style: TextButton.styleFrom(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              backgroundColor: const Color(0xFF4361EE),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              elevation: 0,
             ),
-            onPressed: () {
-              // TODO: sambungkan ke alur "Pesan Lagi"
-            },
             child: const Text(
               'Pesan Lagi',
               style: TextStyle(
@@ -254,6 +334,47 @@ class _RiwayatCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ====== SEGMENT TAB ======
+
+class _SegmentTab extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const _SegmentTab({
+    required this.label,
+    required this.selected,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: selected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: selected
+                  ? const Color(0xFF2C3E50)
+                  : const Color(0xFF7F8C8D),
+            ),
+          ),
+        ),
       ),
     );
   }

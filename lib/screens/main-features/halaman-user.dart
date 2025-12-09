@@ -4,20 +4,13 @@ import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
+import 'package:sahabat_rs/screens/main-features/riwayat-page.dart';
 
 // PERBAIKAN: Import halaman ChatPages (Daftar Pesan)
 import 'package:sahabat_rs/screens/chat/chat-pages.dart';
 
 import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
-
-// STUB / Placeholder agar tidak error
-class RiwayatPage extends StatelessWidget {
-  const RiwayatPage({super.key});
-  @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: Text("Halaman Riwayat")));
-}
 
 class HalamanUser extends StatefulWidget {
   const HalamanUser({super.key});
@@ -429,23 +422,28 @@ class _KategoriCard extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.10),
+                color: Colors.black.withOpacity(0.10),
                 blurRadius: 8,
-                offset: const Offset(0, 4),
+                offset: const Offset(0, 0),
               ),
             ],
             color: Colors.grey[200],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
-            child: Image.asset(
-              assetName,
-              fit: BoxFit.cover,
-              errorBuilder: (ctx, err, stack) =>
-                  const Center(child: Icon(Icons.image_not_supported)),
+            borderRadius: BorderRadius.circular(5),
+            child: Padding(
+              // ⬅️ tambahin padding biar nggak mepet & nggak kelihatan kepotong
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                assetName,
+                // ⬅️ supaya gambar selalu utuh, tidak ter-crop
+                fit: BoxFit.contain,
+                errorBuilder: (ctx, err, stack) =>
+                    const Center(child: Icon(Icons.image_not_supported)),
+              ),
             ),
           ),
         ),
