@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-// import 'package:sahabat_rs/services/salacak_service.dart'; // Uncomment jika dipakai
-// import 'package:sahabat_rs/screens/edit-profile/profile.dart'; // Uncomment jika dipakai
+// PERBAIKAN: Import intl untuk format tanggal dan halaman Jadwal untuk navigasi
+import 'package:intl/intl.dart';
+import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
 
-// PERBAIKAN: Import file dengan nama yang benar (lowercase snake_case)
 import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
 
@@ -65,7 +65,9 @@ class _HalamanUserState extends State<HalamanUser> {
   }
 }
 
-/// BERANDA
+/// ======================
+/// BERANDA (FITUR UTAMA)
+/// ======================
 class _BerandaSection extends StatelessWidget {
   const _BerandaSection();
 
@@ -94,7 +96,7 @@ class _BerandaSection extends StatelessWidget {
   }
 }
 
-/// HEADER
+/// HEADER: ungu + search bar + alamat expandable
 class _HeaderBeranda extends StatefulWidget {
   const _HeaderBeranda();
 
@@ -104,6 +106,7 @@ class _HeaderBeranda extends StatefulWidget {
 
 class _HeaderBerandaState extends State<_HeaderBeranda> {
   bool _isAddressExpanded = false;
+
   String? _userName;
   bool _loadingName = true;
 
@@ -121,11 +124,13 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       String? name;
 
       if (user != null) {
+        // 1. Coba ambil dari metadata auth
         final meta = user.userMetadata;
         if (meta != null && (meta['name'] != null || meta['full_name'] != null)) {
           name = (meta['name'] ?? meta['full_name']) as String?;
         }
 
+        // 2. Jika metadata kosong, ambil dari tabel 'pengguna'
         if (name == null) {
           final data = await client
               .from('pengguna')
@@ -137,6 +142,8 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
             name = data['name'] as String?;
           }
         }
+
+        // 3. Fallback
         name ??= user.email?.split('@').first;
       }
 
@@ -147,6 +154,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         });
       }
     } catch (_) {
+      // Error handling
       if (mounted) {
         setState(() {
           _userName = null;
@@ -159,21 +167,28 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
   @override
   Widget build(BuildContext context) {
     const fullAddress = 'Jl. Teknik Komputer V no 187, Surabaya';
+
     final displayName = _loadingName
         ? '...'
-        : (_userName != null && _userName!.isNotEmpty ? _userName! : 'Pengguna');
+        : (_userName != null && _userName!.isNotEmpty
+            ? _userName!
+            : 'Pengguna');
 
     return SizedBox(
       height: 185,
       child: Stack(
         children: [
+          // background ungu
           Container(
             height: 140,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF5E63E5), Color(0xFF6E7BEE)],
+                colors: [
+                  Color(0xFF5E63E5),
+                  Color(0xFF6E7BEE),
+                ],
               ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -200,7 +215,11 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                     children: [
                       Text(
                         'Selamat Datang, $displayName',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       GestureDetector(
@@ -216,13 +235,20 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                               child: Text(
                                 fullAddress,
                                 maxLines: _isAddressExpanded ? 2 : 1,
-                                overflow: _isAddressExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 12, color: Colors.white),
+                                overflow: _isAddressExpanded
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 4),
                             Icon(
-                              _isAddressExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                              _isAddressExpanded
+                                  ? Icons.keyboard_arrow_up_rounded
+                                  : Icons.keyboard_arrow_down_rounded,
                               size: 18,
                               color: Colors.white,
                             ),
@@ -245,16 +271,21 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                 IconButton(
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
-                    // PERBAIKAN: Cek mounted sebelum navigasi
                     if (context.mounted) {
                       Navigator.of(context).pushReplacementNamed('/');
                     }
                   },
-                   icon: const Icon(Icons.logout, color: Color(0xFFFFC63A), size: 26),
+                   icon: const Icon(
+                    Icons.logout,
+                    color: Color(0xFFFFC63A),
+                    size: 26,
+                  ),
                 ),
               ],
             ),
           ),
+
+          // search bar + filter
           Positioned(
             left: 20,
             right: 20,
@@ -269,7 +300,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          // PERBAIKAN: withValues
                           color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
@@ -279,9 +309,19 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: const [
-                        Icon(Icons.search_rounded, size: 20, color: Color(0xFFBDC3C7)),
+                        Icon(
+                          Icons.search_rounded,
+                          size: 20,
+                          color: Color(0xFFBDC3C7),
+                        ),
                         SizedBox(width: 8),
-                        Text('Cari', style: TextStyle(fontSize: 13, color: Color(0xFFBDC3C7))),
+                        Text(
+                          'Cari',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFFBDC3C7),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -290,8 +330,15 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                 Container(
                   height: 44,
                   width: 44,
-                  decoration: const BoxDecoration(color: Color(0xFFFFAA2B), shape: BoxShape.circle),
-                  child: const Icon(Icons.tune_rounded, color: Colors.white, size: 22),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFAA2B),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.tune_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
               ],
             ),
@@ -314,7 +361,13 @@ class _SectionKategoriLayanan extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Text('Kategori Layanan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Text(
+            'Kategori Layanan',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           SizedBox(height: 15),
           Row(
             children: [
@@ -381,7 +434,6 @@ class _KategoriCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                // PERBAIKAN: withValues
                 color: Colors.black.withValues(alpha: 0.10),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
@@ -425,7 +477,10 @@ class _SectionMedicalCheckup extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Medical Check-Up jadi\nmudah dan nyaman', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  const Text(
+                    'Medical Check-Up jadi\nmudah dan nyaman',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
                   const SizedBox(height: 12),
                   TextButton(
                     style: TextButton.styleFrom(
@@ -469,7 +524,13 @@ class _SectionLayananLain extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Layanan Lain', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const Text(
+            'Layanan Lain',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -486,9 +547,15 @@ class _SectionLayananLain extends StatelessWidget {
                       Container(
                         width: 64,
                         height: 64,
-                        decoration: BoxDecoration(color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF5F6FA),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         padding: const EdgeInsets.all(12),
-                        child: Image.asset('assets/images/ic_jadwal.png', fit: BoxFit.contain),
+                        child: Image.asset(
+                          'assets/images/ic_jadwal.png', 
+                          fit: BoxFit.contain,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       const Text('Jadwal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
@@ -533,12 +600,18 @@ class _LayananLainItem extends StatelessWidget {
             Container(
               width: 64,
               height: 64,
-              decoration: BoxDecoration(color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.all(12),
-              child: Image.asset(assetPath, fit: BoxFit.contain),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F6FA),
+                borderRadius: BorderRadius.circular(20),
+              ),
+            padding: const EdgeInsets.all(12),
+            child: Image.asset(assetPath, fit: BoxFit.contain),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -546,9 +619,34 @@ class _LayananLainItem extends StatelessWidget {
   }
 }
 
-/// JADWAL CHECK-UP TERDEKAT
+/// JADWAL CHECK-UP TERDEKAT (SUDAH DIPERBAIKI)
 class _SectionJadwal extends StatelessWidget {
   const _SectionJadwal();
+
+  // Fungsi fetch data asli dari Supabase
+  Future<List<Map<String, dynamic>>> _fetchUpcomingCheckups() async {
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return [];
+
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      
+      // Ambil 2 jadwal terdekat mulai dari hari ini
+      final response = await supabase
+          .from('checkup')
+          .select('tanggal, kegiatan, lokasi')
+          .eq('id_pengguna', user.id)
+          .gte('tanggal', today)
+          .order('tanggal', ascending: true)
+          .limit(2);
+      
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      debugPrint("Error fetching home checkups: $e");
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -559,9 +657,30 @@ class _SectionJadwal extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Expanded(child: Text('Jadwal Medical Check-Up Terdekat', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
-              Text('Lihat Semua', style: TextStyle(fontSize: 12, color: Color(0xFFFFAA2B), fontWeight: FontWeight.w600)),
+            children: [
+              const Expanded(
+                child: Text(
+                  'Jadwal Medical Check-Up Terdekat',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                ),
+              ),
+              // PERBAIKAN: Tombol Lihat Semua berfungsi
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const JadwalPage()),
+                  );
+                },
+                child: const Text(
+                  'Lihat Semua', 
+                  style: TextStyle(
+                    fontSize: 12, 
+                    color: Color(0xFFFFAA2B), 
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
@@ -570,16 +689,66 @@ class _SectionJadwal extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06), 
+                  blurRadius: 10, 
+                  offset: const Offset(0, 4)
+                ),
               ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: const Column(
-              children: [
-                _JadwalRow(tanggal: '08 Oktober 2025', deskripsi: 'Kontrol Poli PPT - RS HangTuah'),
-                Divider(height: 1, color: Color(0xFFF0F0F0)),
-                _JadwalRow(tanggal: '09 November 2025', deskripsi: 'Kontrol Poli Penyakit Dalam - RS HangTuah'),
-              ],
+            // PERBAIKAN: Menggunakan FutureBuilder untuk data asli
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchUpcomingCheckups(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(child: Text("Gagal memuat jadwal", style: TextStyle(color: Colors.grey, fontSize: 12))),
+                  );
+                }
+                
+                final data = snapshot.data ?? [];
+                
+                if (data.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Center(
+                      child: Text(
+                        "Belum ada jadwal check-up terdekat",
+                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+
+                // Render list jadwal
+                return Column(
+                  children: List.generate(data.length, (index) {
+                    final item = data[index];
+                    final date = DateTime.parse(item['tanggal']);
+                    final formattedDate = DateFormat('dd MMMM yyyy', 'id_ID').format(date);
+                    final deskripsi = "${item['kegiatan']} - ${item['lokasi']}";
+
+                    return Column(
+                      children: [
+                        _JadwalRow(
+                          tanggal: formattedDate,
+                          deskripsi: deskripsi,
+                        ),
+                        if (index < data.length - 1)
+                          const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                      ],
+                    );
+                  }),
+                );
+              },
             ),
           ),
         ],
@@ -678,4 +847,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-// Widget _AssetImage dihapus karena tidak digunakan

@@ -10,7 +10,7 @@ class JadwalService {
   static String get _currentUserId {
     final user = supabase.auth.currentUser;
     if (user == null) {
-      throw Exception("User belum login");
+      throw Exception("User belum login (Sesi habis). Silakan login ulang.");
     }
     return user.id;
   }
@@ -23,19 +23,16 @@ class JadwalService {
           .select(
             'id_checkup, tanggal, lokasi, kegiatan, kondisi_tambahan, waktu_notifikasi',
           )
-          .eq('id_pengguna', _currentUserId) // Menggunakan UUID user
+          .eq('id_pengguna', _currentUserId)
           .gte('tanggal', DateTime.now().toIso8601String().split('T')[0])
           .order('tanggal', ascending: true)
           .limit(1)
           .maybeSingle();
 
-      if (response == null) {
-        return null;
-      }
-
+      if (response == null) return null;
       return JadwalCheckUpDetail.fromMap(response);
     } catch (e) {
-      print('Error fetching Next Jadwal Check-Up Detail: $e');
+      print('Error fetching Next Jadwal Check-Up: $e');
       return null;
     }
   }
@@ -43,7 +40,6 @@ class JadwalService {
   // --- 2. Ambil Jadwal Check-Up berdasarkan Tanggal ---
   static Future<JadwalCheckUpDetail?> getCheckupByDate(DateTime date) async {
     final dateString = date.toIso8601String().split('T')[0];
-
     try {
       final response = await supabase
           .from('checkup')
@@ -54,12 +50,10 @@ class JadwalService {
           .eq('tanggal', dateString)
           .maybeSingle();
 
-      if (response == null) {
-        return null;
-      }
+      if (response == null) return null;
       return JadwalCheckUpDetail.fromMap(response);
     } catch (e) {
-      print('Error fetching Checkup by Date ($dateString): $e');
+      print('Error fetching Checkup by Date: $e');
       return null;
     }
   }
@@ -91,7 +85,7 @@ class JadwalService {
 
       return response.map((data) => JadwalObat.fromJson(data)).toList();
     } catch (e) {
-      print('Error fetching Tinjauan Obat Harian: $e');
+      print('Error fetching Obat Harian: $e');
       return [];
     }
   }
@@ -110,10 +104,9 @@ class JadwalService {
                 '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
             'catatan': obat.catatan,
             'status': obat.statusSelesai,
-            'updated_at': DateTime.now().toIso8601String(),
+            // 'updated_at': DateTime.now().toIso8601String(), // Uncomment jika ada kolom ini
           })
-          .eq('id_jadwalobat', obat.id)
-          .select();
+          .eq('id_jadwalobat', obat.id); // Pastikan nama kolom primary key benar
 
       return true;
     } catch (e) {
@@ -133,15 +126,16 @@ class JadwalService {
     }
   }
 
-  // --- 7. Tambah Jadwal Obat (DIPERBAIKI) ---
-  static Future<bool> addObat(JadwalObat obat) async {
+  // --- 7. Tambah Jadwal Obat (UPDATE: Return String Error) ---
+  static Future<String?> addObat(JadwalObat obat) async {
     try {
-      // PENTING: Jangan gunakan obat.idPengguna (yang mungkin dummy/kosong)
-      // Gunakan _currentUserId yang asli dari sesi login
-      final userId = _currentUserId; 
+      final userId = _currentUserId;
 
-      final response = await supabase.from('jadwalobat').insert({
-        'id_pengguna': userId, // UUID String
+      // Kita coba insert.
+      // NOTE: pastikan nama tabel 'jadwalobat' sesuai dengan di Supabase
+      // Jika di README namanya 'medications', ganti jadi 'medications'
+      await supabase.from('jadwalobat').insert({
+        'id_pengguna': userId,
         'nama_obat': obat.namaObat,
         'jumlah_obat': obat.jumlahObat,
         'durasi_hari': obat.durasiHari,
@@ -150,19 +144,21 @@ class JadwalService {
             '${obat.jamMinum.hour.toString().padLeft(2, '0')}:${obat.jamMinum.minute.toString().padLeft(2, '0')}:00',
         'catatan': obat.catatan,
         'status': false,
-      }).select();
+      });
 
-      return response.isNotEmpty;
+      // Jika sukses tanpa error
+      return null; 
     } catch (e) {
+      // Kembalikan pesan error asli agar bisa ditampilkan di UI
       print('Error adding Jadwal Obat: $e');
-      return false;
+      return e.toString();
     }
   }
 
   // --- 8. Tambah Jadwal Checkup ---
   static Future<bool> addCheckup(JadwalCheckUpDetail detail) async {
     try {
-      final response = await supabase.from('checkup').insert({
+      await supabase.from('checkup').insert({
         'id_pengguna': _currentUserId,
         'tanggal': detail.tanggal.toIso8601String().split('T')[0],
         'lokasi': detail.lokasi,
@@ -170,9 +166,8 @@ class JadwalService {
         'kondisi_tambahan': detail.kondisiTambahan,
         'waktu_notifikasi':
             '${detail.waktuNotifikasi!.hour.toString().padLeft(2, '0')}:${detail.waktuNotifikasi!.minute.toString().padLeft(2, '0')}:00',
-      }).select();
-
-      return response.isNotEmpty;
+      });
+      return true;
     } catch (e) {
       print('Error adding Jadwal Checkup: $e');
       return false;
@@ -191,10 +186,9 @@ class JadwalService {
             'kondisi_tambahan': detail.kondisiTambahan,
             'waktu_notifikasi':
                 '${detail.waktuNotifikasi!.hour.toString().padLeft(2, '0')}:${detail.waktuNotifikasi!.minute.toString().padLeft(2, '0')}:00',
-            'updated_at': DateTime.now().toIso8601String(),
+            // 'updated_at': DateTime.now().toIso8601String(),
           })
-          .eq('id_checkup', detail.idCheckup)
-          .select();
+          .eq('id_checkup', detail.idCheckup);
       return true;
     } catch (e) {
       print('Error updating Jadwal Checkup: $e');

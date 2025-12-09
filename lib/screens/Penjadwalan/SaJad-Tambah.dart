@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../models/jadwal_obat.dart'; // Import model
-import '../../../../services/jadwal_service.dart'; // Import service
+import '../../../../models/jadwal_obat.dart'; 
+import '../../../../services/jadwal_service.dart'; 
 
 // --- Konstanta Warna ---
 const Color _orangeAksen = Color(0xFFF6A230);
@@ -11,11 +11,8 @@ const Color _inputBgColor = Color(0xFFF8F8F6);
 const Color _inputTextColor = Color(0xFF333333);
 const Color _greyIconColor = Color(0xFF9E9E9E);
 
-// --- Tipe Enum untuk Waktu Makan ---
-// Memastikan nilai enum cocok dengan ENUM database: 'sebelum_makan', 'sesudah_makan'
 enum WaktuMakan { sebelum, saat, sesudah }
 
-// --- Widget untuk Pilihan Waktu Makan Kustom (TIDAK BERUBAH) ---
 class WaktuMakanOption extends StatelessWidget {
   final WaktuMakan value;
   final WaktuMakan selectedValue;
@@ -83,7 +80,6 @@ class WaktuMakanOption extends StatelessWidget {
   }
 }
 
-// --- Widget Kustom untuk Input Field (Contoh: Nama Obat) ---
 Widget _buildRoundedInputField({
   required String label,
   required TextEditingController controller,
@@ -146,7 +142,6 @@ Widget _buildRoundedInputField({
   );
 }
 
-// --- Sajad Tambah Page ---
 class SajadTambahPage extends StatefulWidget {
   const SajadTambahPage({Key? key}) : super(key: key);
 
@@ -155,19 +150,19 @@ class SajadTambahPage extends StatefulWidget {
 }
 
 class _SajadTambahPageState extends State<SajadTambahPage> {
-  // State untuk form
   String _namaObat = 'Masukkan Nama Obat';
   int _jumlahObat = 2;
-  String _jenisJumlah = 'pil'; // atau 'tablet', 'sendok', dll.
+  String _jenisJumlah = 'pil';
   int _durasiHari = 30;
 
-  WaktuMakan _waktuMakanTerpilih = WaktuMakan.saat; // Sesuai gambar
-  TimeOfDay _jamMinum = const TimeOfDay(hour: 10, minute: 0); // Sesuai gambar
+  WaktuMakan _waktuMakanTerpilih = WaktuMakan.saat; 
+  TimeOfDay _jamMinum = const TimeOfDay(hour: 10, minute: 0); 
   String _catatan = '';
 
-  // Controller untuk field yang kompleks
   final TextEditingController _namaObatController = TextEditingController();
   final TextEditingController _catatanController = TextEditingController();
+  
+  bool _isSaving = false; // Indikator loading saat menyimpan
 
   @override
   void initState() {
@@ -187,18 +182,16 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
     super.dispose();
   }
 
-  // Fungsi untuk menampilkan Time Picker
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _jamMinum,
       builder: (context, child) {
-        // Kustomisasi warna Time Picker (opsional)
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: _orangeAksen,
             colorScheme: ColorScheme.light(
-              primary: _orangeAksen, // Warna aksen untuk jam yang dipilih
+              primary: _orangeAksen,
               onSurface: Colors.black,
             ),
           ),
@@ -213,18 +206,17 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
     }
   }
 
-  // Fungsi untuk menyimpan data (DIUBAH)
+  // --- Fungsi Simpan Data (DIPERBAIKI) ---
   void _simpanJadwal() async {
-    // Dibuat async
-    // 1. Validasi
-    if (_namaObatController.text.isEmpty || _jumlahObat <= 0) {
+    if (_namaObatController.text.trim().isEmpty || _jumlahObat <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama obat dan jumlah harus diisi.')),
+        const SnackBar(content: Text('Nama obat dan jumlah harus diisi dengan benar.')),
       );
       return;
     }
 
-    // Logic untuk mengkonversi WaktuMakan enum ke string database
+    setState(() => _isSaving = true); // Mulai loading
+
     String getJenisWaktuMakan() {
       switch (_waktuMakanTerpilih) {
         case WaktuMakan.sebelum:
@@ -237,10 +229,9 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
       }
     }
 
-    // 2. Buat objek JadwalObat
     final newJadwal = JadwalObat(
       id: 0, 
-      idPengguna: '', // Kosongkan saja, nanti diisi otomatis di Service pakai UUID asli
+      idPengguna: '', 
       namaObat: _namaObat,
       jamMinum: _jamMinum,
       jenisWaktuMakan: getJenisWaktuMakan(),
@@ -250,27 +241,43 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
       catatan: _catatan,
     );
 
-    // 3. Panggil Service untuk Add Data
-    final success = await JadwalService.addObat(newJadwal);
+    // Panggil service yang mengembalikan pesan error (String?)
+    final errorMessage = await JadwalService.addObat(newJadwal);
 
-    String message;
-    if (success) {
-      message = 'Jadwal obat berhasil ditambahkan.';
+    if (!mounted) return;
+
+    setState(() => _isSaving = false); // Stop loading
+
+    if (errorMessage == null) {
+      // SUKSES (Error null)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Jadwal obat berhasil ditambahkan!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
     } else {
-      message = 'Gagal menambahkan jadwal obat.';
+      // GAGAL (Tampilkan pesan error asli dari Supabase)
+      // Contoh error: "relation 'jadwalobat' does not exist" -> Nama tabel salah
+      // Contoh error: "violates row-level security policy" -> Masalah Auth/RLS
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Gagal Menyimpan"),
+          content: Text("Detail Error:\n$errorMessage\n\nPastikan Anda sudah login dan tabel 'jadwalobat' ada."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text("Tutup"),
+            )
+          ],
+        ),
+      );
     }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-
-    // 4. Kembali ke halaman sebelumnya
-    Navigator.of(context).pop();
   }
 
-  // --- Widget Kustom untuk Pilihan Jumlah & Durasi (2 Pil - 30 Hari) ---
   Widget _buildJumlahDanDurasi() {
-    // Fungsi yang akan dipanggil saat perubahan terjadi pada Dropdown
     void _onChanged(dynamic newValue, String type) {
       setState(() {
         if (type == 'jumlah') {
@@ -283,10 +290,9 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
       });
     }
 
-    // Builder untuk wadah input
     Widget _buildDropdownContainer({
       required Widget child,
-      double width = 80, // Default width
+      double width = 80, 
     }) {
       return Container(
         width: width,
@@ -300,7 +306,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
       );
     }
 
-    // Opsi untuk Jumlah Pil (Simulasi 1-5)
     List<DropdownMenuItem<String>> jumlahItems = [1, 2, 3, 4, 5]
         .map(
           (e) =>
@@ -308,7 +313,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         )
         .toList();
 
-    // Opsi untuk Jenis Jumlah (Pil, Tablet, Kapsul)
     List<DropdownMenuItem<String>> jenisItems = ['pil', 'tablet', 'kapsul']
         .map(
           (e) => DropdownMenuItem(
@@ -318,7 +322,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         )
         .toList();
 
-    // Opsi untuk Durasi Hari (Simulasi 1-30)
     List<DropdownMenuItem<String>> durasiItems =
         List.generate(30, (index) => index + 1)
             .map(
@@ -343,7 +346,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         const SizedBox(height: 10),
         Row(
           children: <Widget>[
-            // 1. Jumlah Obat (2)
             _buildDropdownContainer(
               width: 50,
               child: DropdownButtonHideUnderline(
@@ -363,9 +365,8 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             ),
             const SizedBox(width: 10),
 
-            // 2. Jenis Jumlah (pil)
             _buildDropdownContainer(
-              width: 80, // Lebih lebar untuk teks 'pil'
+              width: 80, 
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _jenisJumlah,
@@ -378,7 +379,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               ),
             ),
 
-            // Icon Kalender (Simulasi)
             const SizedBox(width: 20),
             Container(
               width: 50,
@@ -396,7 +396,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
             const SizedBox(width: 10),
 
-            // 3. Durasi Hari (30 Hari)
             _buildDropdownContainer(
               width: 60,
               child: DropdownButtonHideUnderline(
@@ -416,7 +415,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             ),
             const SizedBox(width: 10),
 
-            // Teks 'Hari'
             const Text(
               'Hari',
               style: TextStyle(color: _inputTextColor, fontSize: 16),
@@ -427,7 +425,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
     );
   }
 
-  // --- Widget Kustom untuk Notifikasi (Input Waktu) ---
   Widget _buildNotifikasiInput() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -465,7 +462,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
                       Text(
                         _jamMinum.format(
                           context,
-                        ), // Menampilkan waktu yang dipilih
+                        ),
                         style: const TextStyle(
                           color: _inputTextColor,
                           fontSize: 16,
@@ -478,7 +475,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               ),
             ),
             const SizedBox(width: 10),
-            // Tombol Tambah Waktu
             InkWell(
               onTap: () {
                 print('Tambah waktu notifikasi');
@@ -499,7 +495,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
     );
   }
 
-  // --- Widget Kustom untuk Catatan (Text Area) ---
   Widget _buildCatatanInput() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -515,7 +510,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         const SizedBox(height: 10),
         TextField(
           controller: _catatanController,
-          maxLines: 4, // Membuatnya terlihat seperti text area
+          maxLines: 4, 
           decoration: InputDecoration(
             filled: true,
             fillColor: _inputBgColor,
@@ -568,28 +563,26 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
             ),
           ),
         ],
-        // Garis pemisah di bawah AppBar
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: Colors.grey[300], height: 1.0),
         ),
       ),
 
-      // --- Body ---
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // 1. Nama Obat
             _buildRoundedInputField(
               label: 'Nama Obat',
               controller: _namaObatController,
               prefixIcon: Image.asset(
-                'assets/images/penjadwalan/pil.png', // Sesuaikan path asset Anda
+                'assets/images/penjadwalan/pil.png', 
                 width: 24,
                 height: 24,
                 color: _greyIconColor,
+                errorBuilder: (_,__,___) => const Icon(Icons.medication),
               ),
               suffixIcon: const Icon(
                 Icons.fullscreen,
@@ -600,12 +593,10 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
             const SizedBox(height: 20),
 
-            // 2. Jumlah & Berapa lama?
             _buildJumlahDanDurasi(),
 
             const SizedBox(height: 20),
 
-            // 3. Makanan & Pil
             const Text(
               'Makanan & Pil',
               style: TextStyle(
@@ -638,12 +629,10 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
 
             const SizedBox(height: 20),
 
-            // 4. Notifikasi
             _buildNotifikasiInput(),
 
             const SizedBox(height: 20),
 
-            // 5. Catatan
             _buildCatatanInput(),
 
             const SizedBox(height: 30),
@@ -651,7 +640,6 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         ),
       ),
 
-      // --- Floating Action Button (DONE) ---
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
           20,
@@ -662,7 +650,7 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
         child: SizedBox(
           height: 55,
           child: ElevatedButton(
-            onPressed: _simpanJadwal,
+            onPressed: _isSaving ? null : _simpanJadwal, // Disable saat loading
             style: ElevatedButton.styleFrom(
               backgroundColor: _orangeAksen,
               shape: RoundedRectangleBorder(
@@ -670,14 +658,16 @@ class _SajadTambahPageState extends State<SajadTambahPage> {
               ),
               elevation: 3,
             ),
-            child: const Text(
-              'Done',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+            child: _isSaving 
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text(
+                    'Done',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),
