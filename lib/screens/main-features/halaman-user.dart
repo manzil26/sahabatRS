@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart'; // Import Sajad Home
+import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:sahabat_rs/services/salacak_service.dart'; // <-- PENTING
-import 'package:sahabat_rs/screens/edit-profile/profile.dart';
+// import 'package:sahabat_rs/services/salacak_service.dart'; // Uncomment jika dipakai
+// import 'package:sahabat_rs/screens/edit-profile/profile.dart'; // Uncomment jika dipakai
 
-
-// Import halaman Darurat
-import '../pengantaran-darurat/Sadar-Pemesan.dart'; 
-// Import halaman Pilih Kendaraan
+// PERBAIKAN: Import file dengan nama yang benar (lowercase snake_case)
+import '../pengantaran-darurat/sadar_pemesanan.dart';
 import '../pendampingan/pilih_kendaraan.dart';
 
 // STUB / Placeholder agar tidak error
@@ -67,9 +65,7 @@ class _HalamanUserState extends State<HalamanUser> {
   }
 }
 
-/// ======================
-/// BERANDA (FITUR UTAMA)
-/// ======================
+/// BERANDA
 class _BerandaSection extends StatelessWidget {
   const _BerandaSection();
 
@@ -98,7 +94,7 @@ class _BerandaSection extends StatelessWidget {
   }
 }
 
-/// HEADER: ungu + search bar + alamat expandable
+/// HEADER
 class _HeaderBeranda extends StatefulWidget {
   const _HeaderBeranda();
 
@@ -108,7 +104,6 @@ class _HeaderBeranda extends StatefulWidget {
 
 class _HeaderBerandaState extends State<_HeaderBeranda> {
   bool _isAddressExpanded = false;
-
   String? _userName;
   bool _loadingName = true;
 
@@ -126,26 +121,22 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       String? name;
 
       if (user != null) {
-        // 1. Coba ambil dari metadata auth
         final meta = user.userMetadata;
         if (meta != null && (meta['name'] != null || meta['full_name'] != null)) {
           name = (meta['name'] ?? meta['full_name']) as String?;
         }
 
-        // 2. Jika metadata kosong, ambil dari tabel 'pengguna' (UPDATE DI SINI)
         if (name == null) {
           final data = await client
-              .from('pengguna') // Ganti 'profiles' jadi 'pengguna'
-              .select('name')   // Ganti 'full_name' jadi 'name' (sesuai ERD)
-              .eq('id_pengguna', user.id) // Ganti 'id' jadi 'id_pengguna'
+              .from('pengguna')
+              .select('name')
+              .eq('id_pengguna', user.id)
               .maybeSingle();
           
           if (data != null) {
             name = data['name'] as String?;
           }
         }
-
-        // 3. Fallback
         name ??= user.email?.split('@').first;
       }
 
@@ -156,7 +147,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         });
       }
     } catch (_) {
-      // Error handling
       if (mounted) {
         setState(() {
           _userName = null;
@@ -169,28 +159,21 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
   @override
   Widget build(BuildContext context) {
     const fullAddress = 'Jl. Teknik Komputer V no 187, Surabaya';
-
     final displayName = _loadingName
         ? '...'
-        : (_userName != null && _userName!.isNotEmpty
-            ? _userName!
-            : 'Pengguna');
+        : (_userName != null && _userName!.isNotEmpty ? _userName! : 'Pengguna');
 
     return SizedBox(
       height: 185,
       child: Stack(
         children: [
-          // background ungu
           Container(
             height: 140,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF5E63E5),
-                  Color(0xFF6E7BEE),
-                ],
+                colors: [Color(0xFF5E63E5), Color(0xFF6E7BEE)],
               ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -201,7 +184,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                   radius: 24,
                   backgroundColor: Colors.white,
                   child: ClipOval(
-                    // UPDATE: Menggunakan ic_user.png dari assets/icons
                     child: Image.asset(
                       'assets/icons/ic_user.png',
                       fit: BoxFit.cover,
@@ -218,11 +200,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                     children: [
                       Text(
                         'Selamat Datang, $displayName',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                        ),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white),
                       ),
                       const SizedBox(height: 4),
                       GestureDetector(
@@ -238,20 +216,13 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                               child: Text(
                                 fullAddress,
                                 maxLines: _isAddressExpanded ? 2 : 1,
-                                overflow: _isAddressExpanded
-                                    ? TextOverflow.visible
-                                    : TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.white,
-                                ),
+                                overflow: _isAddressExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 12, color: Colors.white),
                               ),
                             ),
                             const SizedBox(width: 4),
                             Icon(
-                              _isAddressExpanded
-                                  ? Icons.keyboard_arrow_up_rounded
-                                  : Icons.keyboard_arrow_down_rounded,
+                              _isAddressExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
                               size: 18,
                               color: Colors.white,
                             ),
@@ -264,30 +235,26 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                 const SizedBox(width: 8),
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  // UPDATE: Menggunakan ic_bell.png
                   child: Image.asset(
                     'assets/images/ic_bell.png',
                     width: 26,
                     height: 26,
-                    color: const Color(0xFFFFC63A), // Tint color jika perlu, atau hapus color ini jika gambar asli sudah berwarna
+                    color: const Color(0xFFFFC63A),
                   ),
                 ),
                 IconButton(
                   onPressed: () async {
                     await Supabase.instance.client.auth.signOut();
-                    Navigator.of(context).pushReplacementNamed('/');
+                    // PERBAIKAN: Cek mounted sebelum navigasi
+                    if (context.mounted) {
+                      Navigator.of(context).pushReplacementNamed('/');
+                    }
                   },
-                   icon: const Icon(
-                    Icons.logout,
-                    color: Color(0xFFFFC63A),
-                    size: 26,
-                  ),
+                   icon: const Icon(Icons.logout, color: Color(0xFFFFC63A), size: 26),
                 ),
               ],
             ),
           ),
-
-          // search bar + filter
           Positioned(
             left: 20,
             right: 20,
@@ -302,7 +269,8 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          // PERBAIKAN: withValues
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -311,19 +279,9 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: const [
-                        Icon(
-                          Icons.search_rounded,
-                          size: 20,
-                          color: Color(0xFFBDC3C7),
-                        ),
+                        Icon(Icons.search_rounded, size: 20, color: Color(0xFFBDC3C7)),
                         SizedBox(width: 8),
-                        Text(
-                          'Cari',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFFBDC3C7),
-                          ),
-                        ),
+                        Text('Cari', style: TextStyle(fontSize: 13, color: Color(0xFFBDC3C7))),
                       ],
                     ),
                   ),
@@ -332,15 +290,8 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                 Container(
                   height: 44,
                   width: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFAA2B),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+                  decoration: const BoxDecoration(color: Color(0xFFFFAA2B), shape: BoxShape.circle),
+                  child: const Icon(Icons.tune_rounded, color: Colors.white, size: 22),
                 ),
               ],
             ),
@@ -363,13 +314,7 @@ class _SectionKategoriLayanan extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Text(
-            'Kategori Layanan',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text('Kategori Layanan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           SizedBox(height: 15),
           Row(
             children: [
@@ -377,7 +322,6 @@ class _SectionKategoriLayanan extends StatelessWidget {
                 child: _KategoriCard(
                   title: 'Pesan Pendamping',
                   gradientColors: [Color(0xFF5D79FF), Color(0xFF4C64F0)],
-                  // UPDATE: Menggunakan path sesuai screenshot
                   assetName: 'assets/images/pesanpendamping.png', 
                   isEmergency: false,
                 ),
@@ -387,7 +331,6 @@ class _SectionKategoriLayanan extends StatelessWidget {
                 child: _KategoriCard(
                   title: 'Darurat',
                   gradientColors: [Color(0xFFFFC63A), Color(0xFFFF8A45)],
-                  // UPDATE: Menggunakan path sesuai screenshot
                   assetName: 'assets/images/card_darurat.png', 
                   isEmergency: true,
                 ),
@@ -420,13 +363,11 @@ class _KategoriCard extends StatelessWidget {
       child: GestureDetector(
         onTap: () {
           if (isEmergency) {
-            // -- NAVIGASI KE FITUR DARURAT --
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SadarPemesan()),
             );
           } else {
-            // -- NAVIGASI KE PILIH KENDARAAN (DIPERBAIKI) --
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -440,7 +381,8 @@ class _KategoriCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.10),
+                // PERBAIKAN: withValues
+                color: Colors.black.withValues(alpha: 0.10),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -483,10 +425,7 @@ class _SectionMedicalCheckup extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Medical Check-Up jadi\nmudah dan nyaman',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                  ),
+                  const Text('Medical Check-Up jadi\nmudah dan nyaman', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   TextButton(
                     style: TextButton.styleFrom(
@@ -504,7 +443,6 @@ class _SectionMedicalCheckup extends StatelessWidget {
               flex: 5,
               child: AspectRatio(
                 aspectRatio: 1,
-                // UPDATE: Menggunakan path sesuai screenshot
                 child: Image.asset(
                   'assets/images/card_medical_checkup.png', 
                   fit: BoxFit.contain,
@@ -531,13 +469,7 @@ class _SectionLayananLain extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Layanan Lain',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          const Text('Layanan Lain', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -554,16 +486,9 @@ class _SectionLayananLain extends StatelessWidget {
                       Container(
                         width: 64,
                         height: 64,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F6FA),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        // UPDATE: Menggunakan ic_jadwal.png dan padding agar rapi
+                        decoration: BoxDecoration(color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(20)),
                         padding: const EdgeInsets.all(12),
-                        child: Image.asset(
-                          'assets/images/ic_jadwal.png', 
-                          fit: BoxFit.contain,
-                        ),
+                        child: Image.asset('assets/images/ic_jadwal.png', fit: BoxFit.contain),
                       ),
                       const SizedBox(height: 8),
                       const Text('Jadwal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
@@ -571,8 +496,6 @@ class _SectionLayananLain extends StatelessWidget {
                   ),
                 ),
               ),
-              // UPDATE: Menggunakan Image asset path, bukan IconData
-              // ITEM "Pelacakan" → buka halaman SaLacak
               _LayananLainItem(
                 label: 'Pelacakan',
                 assetPath: 'assets/images/ic_pelacakan.png',
@@ -594,8 +517,8 @@ class _SectionLayananLain extends StatelessWidget {
 
 class _LayananLainItem extends StatelessWidget {
   final String label;
-  final String assetPath; // UPDATE: Menerima String path gambar, bukan IconData
-  final VoidCallback? onTap; // <-- TAMBAH
+  final String assetPath;
+  final VoidCallback? onTap;
 
   const _LayananLainItem({required this.label, required this.assetPath, this.onTap});
 
@@ -603,26 +526,19 @@ class _LayananLainItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: InkWell(
-        onTap: onTap, // <-- sekarang bisa diklik
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
         child: Column(
           children: [
             Container(
               width: 64,
               height: 64,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F6FA),
-                borderRadius: BorderRadius.circular(20),
-              ),
-            // UPDATE: Menambahkan padding dan menggunakan Image.asset
-            padding: const EdgeInsets.all(12),
-            child: Image.asset(assetPath, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              decoration: BoxDecoration(color: const Color(0xFFF5F6FA), borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.all(12),
+              child: Image.asset(assetPath, fit: BoxFit.contain),
             ),
+            const SizedBox(height: 8),
+            Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -630,7 +546,7 @@ class _LayananLainItem extends StatelessWidget {
   }
 }
 
-/// JADWAL CHECK-UP TERDEKAT (Tampilan Saja)
+/// JADWAL CHECK-UP TERDEKAT
 class _SectionJadwal extends StatelessWidget {
   const _SectionJadwal();
 
@@ -644,12 +560,7 @@ class _SectionJadwal extends StatelessWidget {
         children: [
           Row(
             children: const [
-              Expanded(
-                child: Text(
-                  'Jadwal Medical Check-Up Terdekat',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                ),
-              ),
+              Expanded(child: Text('Jadwal Medical Check-Up Terdekat', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700))),
               Text('Lihat Semua', style: TextStyle(fontSize: 12, color: Color(0xFFFFAA2B), fontWeight: FontWeight.w600)),
             ],
           ),
@@ -659,7 +570,7 @@ class _SectionJadwal extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, 4)),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 4)),
               ],
             ),
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -767,19 +678,4 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-
-/// Helper untuk load PNG / SVG dengan satu widget
-class _AssetImage extends StatelessWidget {
-  final String path;
-  final BoxFit fit;
-
-  const _AssetImage(this.path, {this.fit = BoxFit.contain});
-
-  @override
-  Widget build(BuildContext context) {
-    if (path.toLowerCase().endsWith('.svg')) {
-      return SvgPicture.asset(path, fit: fit);
-    }
-    return Image.asset(path, fit: fit);
-  }
-}
+// Widget _AssetImage dihapus karena tidak digunakan

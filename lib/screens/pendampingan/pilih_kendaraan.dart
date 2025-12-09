@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sahabat_rs/screens/pengantaran-darurat/Sadar-Pemesan.dart'; // Import halaman tujuan
+// PERBAIKAN: Sesuaikan nama file dengan yang ada di folder (snake_case)
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pemesanan.dart';
 
 class PilihKendaraanPage extends StatelessWidget {
   const PilihKendaraanPage({super.key});
@@ -8,14 +9,13 @@ class PilihKendaraanPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      // --- APP BAR (HEADER) ---
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0, 
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.orange), 
+          icon: const Icon(Icons.arrow_back, color: Colors.orange),
           onPressed: () {
-            Navigator.pop(context); 
+            Navigator.pop(context);
           },
         ),
         title: const Text(
@@ -28,7 +28,7 @@ class PilihKendaraanPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help, color: Colors.indigo), 
+            icon: const Icon(Icons.help, color: Colors.indigo),
             onPressed: () {},
           )
         ],
@@ -40,23 +40,20 @@ class PilihKendaraanPage extends StatelessWidget {
           ),
         ),
       ),
-      
-      // --- BODY (ISI HALAMAN) ---
+
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           children: [
-            const SizedBox(height: 20), 
-            
+            const SizedBox(height: 20),
+
             // KARTU 1: MOBIL
             _buildVehicleCard(
               title: "Mobil",
-              // Pastikan path gambar benar
-              imagePath: "assets/images/mobil.png", 
-              bgColor: const Color(0xFF7986CB), 
+              imagePath: "assets/images/mobil.png",
+              bgColor: const Color(0xFF7986CB),
               textColor: Colors.white,
               onTap: () {
-                // Navigasi ke SadarPemesan saat Mobil dipilih
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SadarPemesan()),
@@ -64,17 +61,15 @@ class PilihKendaraanPage extends StatelessWidget {
               },
             ),
 
-            const SizedBox(height: 24), 
+            const SizedBox(height: 24),
 
             // KARTU 2: MOTOR
             _buildVehicleCard(
               title: "Sepeda Motor",
-              // Pastikan path gambar benar
-              imagePath: "assets/images/motor.png", 
-              bgColor: const Color(0xFFFDD835), 
-              textColor: Colors.brown[800]!, 
+              imagePath: "assets/images/motor.png",
+              bgColor: const Color(0xFFFDD835),
+              textColor: Colors.brown[800]!,
               onTap: () {
-                // Navigasi ke SadarPemesan saat Motor dipilih
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SadarPemesan()),
@@ -87,7 +82,6 @@ class PilihKendaraanPage extends StatelessWidget {
     );
   }
 
-  // --- WIDGET TAMBAHAN ---
   Widget _buildVehicleCard({
     required String title,
     required String imagePath,
@@ -99,34 +93,33 @@ class PilihKendaraanPage extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: double.infinity, 
-        height: 180, 
+        width: double.infinity,
+        height: 180,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20), 
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              // PERBAIKAN: Menggunakan withValues menggantikan withOpacity
+              color: Colors.grey.withValues(alpha: 0.3),
               spreadRadius: 2,
               blurRadius: 10,
-              offset: const Offset(0, 4), 
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Gambar Kendaraan
             Image.asset(
               imagePath,
-              height: 90, 
+              height: 90,
               fit: BoxFit.contain,
               errorBuilder: (context, error, stackTrace) {
                 return const Icon(Icons.directions_car, size: 80, color: Colors.white54);
               },
             ),
             const SizedBox(height: 10),
-            // Teks Judul
             Text(
               title,
               style: TextStyle(
