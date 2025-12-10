@@ -31,7 +31,7 @@ class _SadarPemesanState extends State<SadarPemesan> {
             ],
           ),
 
-          /// TOMBOL BACK — SAMAA PERSIS SAMA SADAR MENCARI LOKASI
+          /// Back Button
           Positioned(
             top: 50,
             left: 20,
@@ -68,7 +68,7 @@ class _SadarPemesanState extends State<SadarPemesan> {
               ),
               child: Column(
                 children: [
-                  /// Icon tengah (tanpa gambar)
+                  /// Icon tengah 
                   const Icon(
                     Icons.favorite,
                     color: Colors.orange,
