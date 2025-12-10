@@ -19,14 +19,16 @@ class SahabatRS extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // Halaman pertama yang muncul
-      home: const SadarMencariLokasi(),
+      home: const SadarPengantaranSelesai(),
 
 
-      // Daftar route navigasi
       routes: {
+        '/pemesanan': (context) => const SadarPemesan(),
         "/lokasi": (context) => const SadarMencariLokasi(),
-        "/konfirmasi": (context) => const SadarKonfirmasi(),
+
+        /// 🔥 ROUTE BENAR (WAJIB)
+        "/sadar-konfirmasi": (context) => const SadarKonfirmasi(),
+
         "/rating": (context) => const SadarRating(),
         "/selesai": (context) => const SadarPengantaranSelesai(),
       },
