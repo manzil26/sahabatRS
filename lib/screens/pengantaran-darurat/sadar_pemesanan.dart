@@ -17,6 +17,7 @@ class _SadarPemesanState extends State<SadarPemesan> {
     return Scaffold(
       body: Stack(
         children: [
+          /// MAP
           FlutterMap(
             options: MapOptions(
               initialCenter: _center,
@@ -30,7 +31,32 @@ class _SadarPemesanState extends State<SadarPemesan> {
             ],
           ),
 
-          // Bottom Panel
+          /// Back Button
+          Positioned(
+            top: 50,
+            left: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, "/halaman-user");
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 6,
+                    )
+                  ],
+                ),
+                child: const Icon(Icons.arrow_back, size: 28),
+              ),
+            ),
+          ),
+
+          /// BOTTOM PANEL
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -42,19 +68,30 @@ class _SadarPemesanState extends State<SadarPemesan> {
               ),
               child: Column(
                 children: [
-                  const Icon(Icons.health_and_safety,
-                      color: Colors.orange, size: 40),
+                  /// Icon tengah 
+                  const Icon(
+                    Icons.favorite,
+                    color: Colors.orange,
+                    size: 40,
+                  ),
+
                   const SizedBox(height: 10),
+
                   const Text(
                     "Tenang dulu ya, Kami lagi nyari pendamping darurat secepatnya",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                   ),
+
                   const Spacer(),
+
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(
+                            context, "/halaman-user");
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         padding: const EdgeInsets.symmetric(vertical: 14),

@@ -25,7 +25,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
   final TextEditingController pickupController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
 
-  /// 🔍 Search OSM
   void searchLocation(String query) async {
     if (query.length < 3) {
       setState(() => searchResults = []);
@@ -42,7 +41,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
     }
   }
 
-  /// 📍 Select lokasi
   void selectLocation(dynamic place) {
     final lat = double.parse(place["lat"]);
     final lon = double.parse(place["lon"]);
@@ -66,7 +64,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
     }
   }
 
-  /// 🚗 Ambil rute OSRM
   Future<void> getRouteOSRM() async {
     final url = Uri.parse(
       "https://router.project-osrm.org/route/v1/driving/"
@@ -88,102 +85,16 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
     }
   }
 
-  /// 🧡 Popup driver
-  void showDriverPopup() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        height: 270,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Driver Sedang Menuju Anda",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.orange,
-                  child: Icon(Icons.person, size: 40, color: Colors.white),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Budi Santoso",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text("Motor Beat 2020 • L 1234 XX",
-                        style: TextStyle(fontSize: 14, color: Colors.grey)),
-                  ],
-                )
-              ],
-            ),
-
-            const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Tutup", style: TextStyle(fontSize: 18)),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          /// 🗺 MAP
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
               initialCenter: LatLng(-7.2756, 112.6426),
               initialZoom: 15,
-              onTap: (tapPos, point) {
-                setState(() {
-                  if (pickup == null) {
-                    pickup = point;
-                    pickupController.text =
-                        "${point.latitude}, ${point.longitude}";
-                  } else if (destination == null) {
-                    destination = point;
-                    destinationController.text =
-                        "${point.latitude}, ${point.longitude}";
-                  } else {
-                    pickup = point;
-                    pickupController.text =
-                        "${point.latitude}, ${point.longitude}";
-                    destination = null;
-                    destinationController.clear();
-                  }
-                });
-
-                if (pickup != null && destination != null) {
-                  getRouteOSRM();
-                }
-              },
             ),
             children: [
               TileLayer(
@@ -191,7 +102,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                 userAgentPackageName: "com.example.sahabat_rs",
               ),
 
-              /// 🔵 Jalur
               if (routeLine.isNotEmpty)
                 PolylineLayer(
                   polylines: [
@@ -203,7 +113,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ],
                 ),
 
-              /// Marker pickup
               if (pickup != null)
                 MarkerLayer(
                   markers: [
@@ -217,7 +126,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ],
                 ),
 
-              /// Marker destination
               if (destination != null)
                 MarkerLayer(
                   markers: [
@@ -225,38 +133,30 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                       point: destination!,
                       width: 40,
                       height: 40,
-                      child:
-                          const Icon(Icons.flag, size: 40, color: Colors.purple),
+                      child: const Icon(Icons.flag,
+                          size: 40, color: Colors.purple),
                     )
                   ],
                 ),
             ],
           ),
 
-          // ⬅️ TOMBOL BACK (MIRIP DESAIN)
           Positioned(
             top: 50,
             left: 20,
             child: GestureDetector(
-              onTap: () => Navigator.pop(context),
+              onTap: () => Navigator.pushNamed(context, '/pemesanan'),
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 6,
-                    )
-                  ],
                 ),
                 child: const Icon(Icons.arrow_back, size: 28),
               ),
             ),
           ),
 
-          /// 🔍 Search hasil
           if (searchResults.isNotEmpty)
             Positioned(
               left: 15,
@@ -283,7 +183,6 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
               ),
             ),
 
-          /// 🟧 Panel bawah
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -328,8 +227,11 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   const SizedBox(height: 20),
 
                   ElevatedButton(
-                    onPressed:
-                        (pickup != null && destination != null) ? showDriverPopup : null,
+                    onPressed: (pickup != null && destination != null)
+                        ? () {
+                            Navigator.pushNamed(context, "/sadar-konfirmasi");
+                          }
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                       minimumSize: const Size(double.infinity, 55),
