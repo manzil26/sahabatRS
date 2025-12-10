@@ -25,10 +25,7 @@ class SahabatRS extends StatelessWidget {
       routes: {
         '/pemesanan': (context) => const SadarPemesan(),
         "/lokasi": (context) => const SadarMencariLokasi(),
-
-        /// 🔥 ROUTE BENAR (WAJIB)
         "/sadar-konfirmasi": (context) => const SadarKonfirmasi(),
-
         "/rating": (context) => const SadarRating(),
         "/selesai": (context) => const SadarPengantaranSelesai(),
       },
