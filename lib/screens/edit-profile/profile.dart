@@ -5,11 +5,12 @@ import 'package:iconify_flutter/icons/mdi.dart';
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-   @override
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // body pakai gradient kuning bergradasi (atas pekat -> bawah pucat/putih)
-        body: Container(
+      body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -21,7 +22,6 @@ class ProfilePage extends StatelessWidget {
               Color(0xFF5966B1), // ungu bawah
             ],
             stops: [0.0, 0.45, 0.8, 1.0],
-            
           ),
         ),
         child: Column(
@@ -39,7 +39,8 @@ class ProfilePage extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Colors.white,
                   ),
-                  padding: const EdgeInsets.all(0.7), // border putih lebih tipis
+                  padding:
+                      const EdgeInsets.all(0.7), // border putih lebih tipis
                   child: ClipOval(
                     child: Image.asset(
                       "assets/images/user.png",
@@ -66,7 +67,6 @@ class ProfilePage extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                // full sampai bawah: tidak ada margin/padding ekstra di bawah
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: const BorderRadius.only(
@@ -86,7 +86,6 @@ class ProfilePage extends StatelessWidget {
                   vertical: 18,
                 ),
                 child: ListView(
-                  // ⬇️ di-scroll lagi di HP (physics default, gak dikunci)
                   padding: EdgeInsets.zero,
                   children: [
                     menuItem(
@@ -129,48 +128,51 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
 
-     // ===== FIXED BOTTOM NAVBAR MENTOK BAWAH =====
- bottomNavigationBar: Container(
-      height: 90,
-      color: Colors.white,
+      // ===== FIXED BOTTOM NAVBAR MENTOK BAWAH =====
+      bottomNavigationBar: Container(
+        height: 90,
+        color: Colors.white,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            // bar ungu
-            Container(
-              height: 70,
-              decoration: const BoxDecoration(
-                color: Color(0xFF5966B1),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
+            // bar ungu ditempel ke bawah
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 70,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF5966B1),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  _BottomItem(
-                    icon: Icons.home_filled,
-                    label: "Beranda",
-                  ),
-                  _BottomItem(
-                    icon: Icons.history,
-                    label: "Riwayat",
-                  ),
-                  _BottomItem(
-                    icon: Icons.message,
-                    label: "Pesan",
-                  ),
-                  SizedBox(width: 52), // space di bawah ikon Profil
-                ],
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    _BottomItem(
+                      icon: Icons.home_filled,
+                      label: "Beranda",
+                    ),
+                    _BottomItem(
+                      icon: Icons.history,
+                      label: "Riwayat",
+                    ),
+                    _BottomItem(
+                      icon: Icons.message,
+                      label: "Pesan",
+                    ),
+                    SizedBox(width: 52), // space di bawah ikon Profil
+                  ],
+                ),
               ),
             ),
 
             // ikon Profil: icon putih, lingkaran oranye, border putih tebal
             Positioned(
               right: 24,
-              top: -20,
+              top: 0,
               child: Column(
                 children: [
                   Container(
@@ -180,7 +182,8 @@ class ProfilePage extends StatelessWidget {
                       color: Colors.white, // border putih
                       shape: BoxShape.circle,
                     ),
-                    padding: const EdgeInsets.all(6), // ketebalan border putih
+                    padding:
+                        const EdgeInsets.all(6), // ketebalan border putih
                     child: Container(
                       decoration: const BoxDecoration(
                         color: Color(0xFFF6A230), // lingkaran oranye
@@ -199,7 +202,8 @@ class ProfilePage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFF6A230), // tulisan Profil oranye
+                      color:
+                          Color(0xFFF6A230), // tulisan Profil oranye
                     ),
                   ),
                 ],
@@ -210,6 +214,7 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+
   // ================= WIDGET MENU ITEM =================
   Widget menuItem({
     required String iconAsset,
