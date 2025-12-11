@@ -33,13 +33,13 @@ class ProfilePage extends StatelessWidget {
               children: [
                 // diameter tetap, border putih TIPIS
                 Container(
-                  width: 137,
-                  height: 137,
+                  width: 144,
+                  height: 144,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
                   ),
-                  padding: const EdgeInsets.all(1.1), // border putih lebih tipis
+                  padding: const EdgeInsets.all(0.7), // border putih lebih tipis
                   child: ClipOval(
                     child: Image.asset(
                       "assets/images/user.png",
@@ -129,8 +129,8 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
 
-      // ================= BOTTOM NAV =================
-      bottomNavigationBar: Container(
+     // ===== FIXED BOTTOM NAVBAR MENTOK BAWAH =====
+ bottomNavigationBar: Container(
       height: 90,
       color: Colors.white,
         child: Stack(
@@ -210,7 +210,6 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-
   // ================= WIDGET MENU ITEM =================
   Widget menuItem({
     required String iconAsset,
