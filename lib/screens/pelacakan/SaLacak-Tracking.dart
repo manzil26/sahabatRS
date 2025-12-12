@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/models/lacak_pendampingan.dart';
-import 'package:sahabat_rs/services/salacak_service.dart'; // <-- PENTING
+import 'package:sahabat_rs/services/salacak_service.dart';
+// ⬇️ IMPORT halaman selesai pengantaran
+import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pengantaran_selesai.dart';
 
 /// HALAMAN Tracking SaLacak
 /// - Dipanggil ketika tekan "Lacak Pendampingan"
@@ -48,8 +50,14 @@ class SaLacakTrackingPage extends StatelessWidget {
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back_ios_new_rounded),
                         onPressed: () {
-                          // selalu balik ke halaman sebelumnya
-                          Navigator.of(context).pop();
+                          // ⬇️ SELALU ke halaman SadarPengantaranSelesai
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  const SadarPengantaranSelesai(),
+                            ),
+                          );
                         },
                       ),
                     ),

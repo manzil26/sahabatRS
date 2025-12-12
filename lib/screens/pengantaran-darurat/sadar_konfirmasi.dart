@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'sadar_mencari_lokasi.dart'; 
+import 'package:sahabat_rs/screens/pelacakan/SaLacak-Tracking.dart';
 
 class SadarKonfirmasi extends StatelessWidget {
   const SadarKonfirmasi({super.key});
@@ -175,7 +176,14 @@ class SadarKonfirmasi extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                            MaterialPageRoute(
+                              builder: (_) => const SaLacakTrackingPage(),
+                            ),
+                          );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
                         shape: RoundedRectangleBorder(
