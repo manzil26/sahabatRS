@@ -43,7 +43,11 @@ class _SadarRatingState extends State<SadarRating> {
               right: 10,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // Tidak kembali ke halaman user
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/home',          // langsung ke HalamanUser
+                    (route) => false, // bersihkan stack sebelumnya
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),

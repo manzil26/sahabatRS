@@ -145,7 +145,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
             top: 50,
             left: 20,
             child: GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/pemesanan'),
+              onTap: () => Navigator.pushNamed(context, '/home'),
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -229,7 +229,7 @@ class _SadarMencariLokasiState extends State<SadarMencariLokasi> {
                   ElevatedButton(
                     onPressed: (pickup != null && destination != null)
                         ? () {
-                            Navigator.pushNamed(context, "/sadar-konfirmasi");
+                            Navigator.pushNamed(context, "/konfirmasi");
                           }
                         : null,
                     style: ElevatedButton.styleFrom(

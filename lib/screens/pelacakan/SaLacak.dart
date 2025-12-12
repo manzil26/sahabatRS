@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/models/keluarga.dart';
 import 'package:sahabat_rs/services/salacak_service.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 /// HALAMAN SaLacak (Map + Tambahkan Orang Terdekat + Hubungkan)
 /// - Muncul ketika:
@@ -167,18 +169,23 @@ class _SaLacakPageState extends State<SaLacakPage> {
       // Background map + bottom card mirip desain Figma
       body: Stack(
         children: [
-          // BAGIAN MAP (sementara placeholder, bisa diganti GoogleMap)
-          Positioned.fill(
-            child: Container(
-              color: const Color(0xFFE3ECF8),
-              child: const Center(
-                child: Text(
-                  "Map akan ditampilkan di sini",
-                  style: TextStyle(color: Colors.black54),
-                ),
-              ),
-            ),
-          ),
+// BAGIAN MAP: OSM via flutter_map
+Positioned.fill(
+  child: FlutterMap(
+    options: const MapOptions(
+      // contoh: area ITS, silakan sesuaikan dengan yang kamu pakai di pengantaran-darurat
+      initialCenter: LatLng(-7.2797, 112.7950),
+      initialZoom: 15,
+    ),
+    children: [
+      // LAYER TILE OSM
+      TileLayer(
+        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        userAgentPackageName: 'com.example.sahabat_rs',
+      ),
+    ],
+  ),
+),
 
           // Tombol back bulat di pojok kiri atas
           SafeArea(
