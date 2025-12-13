@@ -266,7 +266,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             // ikon Profil: icon putih, lingkaran oranye, border putih tebal
             Positioned(
               right: 24,
-              top: -20,
+              top: 0,
               child: Column(
                 children: [
                   Container(

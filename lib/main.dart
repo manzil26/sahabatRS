@@ -5,7 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 // --- BAGIAN 1: PANGGIL FILE HALAMAN KAMU ---
 // Pastikan nama file di folder screens/pendampingan sudah 'pilih_kendaraan.dart'
 import 'screens/pendampingan/pilih_kendaraan.dart'; 
-import 'screens/edit-profile/profile.dart';
+import 'screens/edit-profile/edit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
   
       // --- BAGIAN 3: TENTUKAN HALAMAN PERTAMA ---
       // Di sini kita pasang halaman PilihKendaraanPage sebagai halaman utama yang muncul
-      home: const ProfilePage(), 
+      home: const EditProfilePage(), 
     );
   }
 }
