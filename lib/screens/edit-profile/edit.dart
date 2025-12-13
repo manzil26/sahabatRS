@@ -1,8 +1,12 @@
-import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
+
+import 'package:sahabat_rs/screens/edit-profile/profile.dart';
+import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -12,7 +16,7 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  bool isEditing = false;
+  bool isEditing = true;
 
   final TextEditingController nameController =
       TextEditingController(text: "Lastri");
@@ -31,7 +35,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late List<String> selectedConditions;
 
   final ImagePicker _picker = ImagePicker();
-  XFile? pickedImage;
+  Uint8List? pickedImageBytes;
 
   @override
   void initState() {
@@ -42,8 +46,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _pickProfileImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      final bytes = await image.readAsBytes();
       setState(() {
-        pickedImage = image;
+        pickedImageBytes = bytes;
       });
     }
   }
@@ -52,12 +57,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     setState(() {
       isEditing = false;
     });
+    // TODO: simpan ke backend / Supabase kalau sudah siap
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // FIX: mematikan SafeArea bottom supaya navbar tidak terangkat
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -71,14 +76,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             stops: [0.0, 0.55, 1.0],
           ),
         ),
-
         child: SafeArea(
-          bottom: false, // ⬅️ FIX PALING PENTING
+          bottom: false,
           child: Column(
             children: [
               // ===== APPBAR =====
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -132,14 +137,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                       padding: const EdgeInsets.all(1.1),
                       child: ClipOval(
-                        child: pickedImage == null
-                            ? Image.asset("assets/images/user.png",
-                                fit: BoxFit.cover)
-                            : Image.file(File(pickedImage!.path),
-                                fit: BoxFit.cover),
+                        child: pickedImageBytes == null
+                            ? Image.asset(
+                                "assets/images/user.png",
+                                fit: BoxFit.cover,
+                              )
+                            : Image.memory(
+                                pickedImageBytes!,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
-
                     Positioned(
                       right: -2,
                       bottom: -2,
@@ -164,8 +172,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               color: Color(0xFF5966B1),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.camera_alt_outlined,
-                                size: 18, color: Colors.white),
+                            child: const Icon(
+                              Icons.camera_alt_outlined,
+                              size: 18,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -188,8 +199,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
                     child: SingleChildScrollView(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -211,8 +224,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           const SizedBox(height: 20),
 
                           _buildLabel("Nomor Telepon"),
-                          _buildField(phoneController,
-                              keyboardType: TextInputType.phone),
+                          _buildField(
+                            phoneController,
+                            keyboardType: TextInputType.phone,
+                          ),
                           const SizedBox(height: 40),
                         ],
                       ),
@@ -225,91 +240,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       ),
 
-      // ===== FIXED BOTTOM NAVBAR MENTOK BAWAH =====
- bottomNavigationBar: Container(
-      height: 90,
-      color: Colors.white,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // bar ungu
-            Container(
-              height: 70,
-              decoration: const BoxDecoration(
-                color: Color(0xFF5966B1),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  _BottomItem(
-                    icon: Icons.home_filled,
-                    label: "Beranda",
-                  ),
-                  _BottomItem(
-                    icon: Icons.history,
-                    label: "Riwayat",
-                  ),
-                  _BottomItem(
-                    icon: Icons.message,
-                    label: "Pesan",
-                  ),
-                  SizedBox(width: 52), // space di bawah ikon Profil
-                ],
-              ),
-            ),
-
-            // ikon Profil: icon putih, lingkaran oranye, border putih tebal
-            Positioned(
-              right: 24,
-              top: 0,
-              child: Column(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Colors.white, // border putih
-                      shape: BoxShape.circle,
-                    ),
-                    padding: const EdgeInsets.all(6), // ketebalan border putih
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF6A230), // lingkaran oranye
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: Colors.white, // ikon user putih
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    "Profil",
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFF6A230), // tulisan Profil oranye
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      // bottom nav share style
+      bottomNavigationBar: const _EditProfileBottomNavBar(),
     );
   }
 
-
-  // ==============================================================
-  // WIDGET BANTUAN
   // ==============================================================
 
   Widget _buildLabel(String text) {
@@ -382,26 +317,157 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 }
 
-// ==============================================================
-class _BottomItem extends StatelessWidget {
+// ================= BOTTOM NAV UNTUK EDIT PROFILE =================
+class _EditProfileBottomNavBar extends StatelessWidget {
+  const _EditProfileBottomNavBar();
+
+  @override
+  Widget build(BuildContext context) {
+    const int currentIndex = 3;
+    const orange = Color(0xFFF6A230);
+
+    return SizedBox(
+      height: 90,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 20,
+            bottom: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF5966B1),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  _EditNavItem(
+                    index: 0,
+                    icon: Icons.home_filled,
+                    label: 'Beranda',
+                  ),
+                  _EditNavItem(
+                    index: 1,
+                    icon: Icons.history,
+                    label: 'Riwayat',
+                  ),
+                  _EditNavItem(
+                    index: 2,
+                    icon: Icons.message,
+                    label: 'Pesan',
+                  ),
+                  _EditNavItem(
+                    index: 3,
+                    icon: Icons.person,
+                    label: 'Profil',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EditNavItem extends StatelessWidget {
+  final int index;
   final IconData icon;
   final String label;
 
-  const _BottomItem({
+  const _EditNavItem({
     super.key,
+    required this.index,
     required this.icon,
     required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: Colors.white, size: 24),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 11)),
-      ],
+    const int currentIndex = 3;
+    const orange = Color(0xFFF6A230);
+    final bool selected = index == currentIndex;
+
+    return GestureDetector(
+      onTap: () {
+        if (index == currentIndex) {
+          // Profil → balik ke ProfilePage
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ProfilePage(),
+            ),
+          );
+          return;
+        }
+
+        // 0/1/2 → balik ke HalamanUser tab sesuai
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HalamanUser(initialIndex: index),
+          ),
+        );
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 70,
+        height: 70,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              top: selected ? -12 : 10,
+              child: selected
+                  ? Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: orange,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+            ),
+            Positioned(
+              bottom: 8,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? orange : Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

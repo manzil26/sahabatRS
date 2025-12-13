@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
 
+import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
+import 'package:sahabat_rs/screens/edit-profile/edit.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +33,6 @@ class ProfilePage extends StatelessWidget {
             // ================= AVATAR + NAMA =================
             Column(
               children: [
-                // diameter tetap, border putih TIPIS
                 Container(
                   width: 144,
                   height: 144,
@@ -39,8 +40,7 @@ class ProfilePage extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: Colors.white,
                   ),
-                  padding:
-                      const EdgeInsets.all(0.7), // border putih lebih tipis
+                  padding: const EdgeInsets.all(0.7),
                   child: ClipOval(
                     child: Image.asset(
                       "assets/images/user.png",
@@ -63,7 +63,7 @@ class ProfilePage extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // ================= KOTAK MENU PUTIH (FULL KIRI–KANAN–BAWAH) =================
+            // ================= KOTAK MENU PUTIH =================
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -92,7 +92,14 @@ class ProfilePage extends StatelessWidget {
                       iconAsset: "assets/images/profil.png",
                       text: "Edit Profil",
                       bgColor: const Color(0xFF5966B1).withOpacity(0.4),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const EditProfilePage(),
+                          ),
+                        );
+                      },
                     ),
                     menuItem(
                       iconAsset: "assets/images/notifikasi.png",
@@ -128,90 +135,8 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
 
-      // ===== FIXED BOTTOM NAVBAR MENTOK BAWAH =====
-      bottomNavigationBar: Container(
-        height: 90,
-        color: Colors.white,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // bar ungu ditempel ke bawah
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 70,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF5966B1),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    _BottomItem(
-                      icon: Icons.home_filled,
-                      label: "Beranda",
-                    ),
-                    _BottomItem(
-                      icon: Icons.history,
-                      label: "Riwayat",
-                    ),
-                    _BottomItem(
-                      icon: Icons.message,
-                      label: "Pesan",
-                    ),
-                    SizedBox(width: 52), // space di bawah ikon Profil
-                  ],
-                ),
-              ),
-            ),
-
-            // ikon Profil: icon putih, lingkaran oranye, border putih tebal
-            Positioned(
-              right: 24,
-              top: 0,
-              child: Column(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      color: Colors.white, // border putih
-                      shape: BoxShape.circle,
-                    ),
-                    padding:
-                        const EdgeInsets.all(6), // ketebalan border putih
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF6A230), // lingkaran oranye
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.person,
-                        color: Colors.white, // ikon user putih
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    "Profil",
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color:
-                          Color(0xFFF6A230), // tulisan Profil oranye
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      // bottom nav share style
+      bottomNavigationBar: const _ProfileBottomNavBar(),
     );
   }
 
@@ -224,7 +149,7 @@ class ProfilePage extends StatelessWidget {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-        vertical: 4, // jarak antar fitur biar gak dempet
+        vertical: 4,
       ),
       child: ListTile(
         onTap: onTap,
@@ -258,36 +183,150 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-// ================= WIDGET ITEM NAV BAR (3 ikon kiri) =================
-class _BottomItem extends StatelessWidget {
+// ================= BOTTOM NAV UNTUK PROFILE =================
+class _ProfileBottomNavBar extends StatelessWidget {
+  const _ProfileBottomNavBar();
+
+  @override
+  Widget build(BuildContext context) {
+    const int currentIndex = 3;
+    const orange = Color(0xFFF6A230);
+
+    return SizedBox(
+      height: 90,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 20,
+            bottom: 0,
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF5966B1),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  _ProfileNavItem(
+                    index: 0,
+                    icon: Icons.home_filled,
+                    label: 'Beranda',
+                  ),
+                  _ProfileNavItem(
+                    index: 1,
+                    icon: Icons.history,
+                    label: 'Riwayat',
+                  ),
+                  _ProfileNavItem(
+                    index: 2,
+                    icon: Icons.message,
+                    label: 'Pesan',
+                  ),
+                  _ProfileNavItem(
+                    index: 3,
+                    icon: Icons.person,
+                    label: 'Profil',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileNavItem extends StatelessWidget {
+  final int index;
   final IconData icon;
   final String label;
 
-  const _BottomItem({
+  const _ProfileNavItem({
     super.key,
+    required this.index,
     required this.icon,
     required this.label,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white,
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Colors.white,
+    const int currentIndex = 3;
+    const orange = Color(0xFFF6A230);
+    final bool selected = index == currentIndex;
+
+    return GestureDetector(
+      onTap: () {
+        if (index == currentIndex) {
+          // sudah di Profil
+          return;
+        }
+        // 0/1/2 => balik ke HalamanUser dengan tab sesuai
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => HalamanUser(initialIndex: index),
           ),
+        );
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 70,
+        height: 70,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              top: selected ? -12 : 10,
+              child: selected
+                  ? Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(4),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: orange,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          icon,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+            ),
+            Positioned(
+              bottom: 8,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: selected ? orange : Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
