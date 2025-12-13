@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
@@ -9,25 +9,16 @@ import 'package:sahabat_rs/screens/chat/chat-pages.dart';
 
 import '../pengantaran-darurat/sadar_mencari_lokasi.dart';
 import '../pendampingan/pilih_kendaraan.dart';
-import 'package:sahabat_rs/screens/edit-profile/profile.dart';
 
 class HalamanUser extends StatefulWidget {
-  final int initialIndex;
-
-  const HalamanUser({super.key, this.initialIndex = 0});
+  const HalamanUser({super.key});
 
   @override
   State<HalamanUser> createState() => _HalamanUserState();
 }
 
 class _HalamanUserState extends State<HalamanUser> {
-  late int _currentIndex;
-
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-  }
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +124,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       String? name;
       String? address;
 
-      // 1) dari metadata auth
+      // 1) Coba dari metadata auth terlebih dahulu
       final meta = user.userMetadata;
       if (meta != null) {
         if (meta['name'] != null || meta['full_name'] != null) {
@@ -144,7 +135,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         }
       }
 
-      // 2) dari tabel 'pengguna'
+      // 2) Ambil dari tabel 'pengguna' (profil)
       final data = await client
           .from('pengguna')
           .select('name, alamat')
@@ -159,7 +150,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         }
       }
 
-      // 3) fallback nama ke prefix email
+      // 3) Fallback nama ke prefix email kalau tetap null
       name ??= user.email?.split('@').first;
 
       if (!mounted) return;
@@ -304,7 +295,6 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
               ],
             ),
           ),
-
           // search bar + filter
           Positioned(
             left: 20,
@@ -529,10 +519,8 @@ class _SectionMedicalCheckup extends StatelessWidget {
                     onPressed: () {},
                     child: const Text(
                       'Pesan Sekarang!',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style:
+                          TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],
@@ -936,7 +924,6 @@ class _CustomBottomNavBar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // background ungu
           Positioned(
             left: 0,
             right: 0,
@@ -1013,19 +1000,7 @@ class _BottomBarItem extends StatelessWidget {
     const orange = Color(0xFFF6A230);
 
     return GestureDetector(
-      onTap: () {
-        if (index == 3) {
-          // tab Profil → buka halaman Profile
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const ProfilePage(),
-            ),
-          );
-        } else {
-          onTap(index);
-        }
-      },
+      onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 70,

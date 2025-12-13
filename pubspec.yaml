@@ -9,9 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    
-  image_picker: ^1.0.0
-  iconify_flutter: ^0.0.5   # ⬅ tambahin ini (atau versi terbaru di pub.dev)
 
   # Dependensi Utama
   supabase_flutter: ^2.10.3
