@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:intl/intl.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-=======
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
->>>>>>> 35c9e0c (Update profile & halaman user)
 
 import 'package:sahabat_rs/screens/penjadwalan/sajad-home.dart';
 import 'package:sahabat_rs/screens/Penjadwalan/jadwal.dart';
@@ -14,10 +9,7 @@ import 'package:sahabat_rs/screens/chat/chat-pages.dart';
 
 import '../pengantaran-darurat/sadar_mencari_lokasi.dart';
 import '../pendampingan/pilih_kendaraan.dart';
-<<<<<<< HEAD
-=======
 import 'package:sahabat_rs/screens/edit-profile/profile.dart';
->>>>>>> 35c9e0c (Update profile & halaman user)
 
 class HalamanUser extends StatefulWidget {
   final int initialIndex;
@@ -141,11 +133,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
       String? name;
       String? address;
 
-<<<<<<< HEAD
-      // 1) Coba dari metadata auth terlebih dahulu
-=======
       // 1) dari metadata auth
->>>>>>> 35c9e0c (Update profile & halaman user)
       final meta = user.userMetadata;
       if (meta != null) {
         if (meta['name'] != null || meta['full_name'] != null) {
@@ -156,11 +144,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         }
       }
 
-<<<<<<< HEAD
-      // 2) Ambil dari tabel 'pengguna' (profil)
-=======
       // 2) dari tabel 'pengguna'
->>>>>>> 35c9e0c (Update profile & halaman user)
       final data = await client
           .from('pengguna')
           .select('name, alamat')
@@ -175,11 +159,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         }
       }
 
-<<<<<<< HEAD
-      // 3) Fallback nama ke prefix email kalau tetap null
-=======
       // 3) fallback nama ke prefix email
->>>>>>> 35c9e0c (Update profile & halaman user)
       name ??= user.email?.split('@').first;
 
       if (!mounted) return;
@@ -324,6 +304,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
               ],
             ),
           ),
+
           // search bar + filter
           Positioned(
             left: 20,
@@ -548,15 +529,10 @@ class _SectionMedicalCheckup extends StatelessWidget {
                     onPressed: () {},
                     child: const Text(
                       'Pesan Sekarang!',
-<<<<<<< HEAD
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-=======
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                       ),
->>>>>>> 35c9e0c (Update profile & halaman user)
                     ),
                   ),
                 ],
@@ -960,10 +936,7 @@ class _CustomBottomNavBar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-<<<<<<< HEAD
-=======
           // background ungu
->>>>>>> 35c9e0c (Update profile & halaman user)
           Positioned(
             left: 0,
             right: 0,

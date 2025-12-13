@@ -470,8 +470,4 @@ class _EditNavItem extends StatelessWidget {
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 35c9e0c (Update profile & halaman user)

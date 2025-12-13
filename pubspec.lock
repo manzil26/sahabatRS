@@ -309,10 +309,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-<<<<<<< HEAD
-  intl:
-    dependency: "direct main"
-=======
   iconify_flutter:
     dependency: "direct main"
     description:
@@ -331,7 +327,6 @@ packages:
     version: "1.2.1"
   image_picker_android:
     dependency: transitive
->>>>>>> 35c9e0c (Update profile & halaman user)
     description:
       name: image_picker_android
       sha256: "5e9bf126c37c117cf8094215373c6d561117a3cfb50ebc5add1a61dc6e224677"
