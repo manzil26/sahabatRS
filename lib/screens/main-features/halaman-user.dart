@@ -11,6 +11,24 @@ import '../pengantaran-darurat/sadar_mencari_lokasi.dart';
 import '../pendampingan/pilih_kendaraan.dart';
 import 'package:sahabat_rs/screens/edit-profile/profile.dart';
 
+/// ======================
+/// FILTER BERANDA (tanpa screen baru)
+/// ======================
+enum HomeFilter { semua, layanan, jadwal }
+
+extension HomeFilterLabel on HomeFilter {
+  String get label {
+    switch (this) {
+      case HomeFilter.semua:
+        return 'Semua';
+      case HomeFilter.layanan:
+        return 'Layanan';
+      case HomeFilter.jadwal:
+        return 'Jadwal';
+    }
+  }
+}
+
 class HalamanUser extends StatefulWidget {
   final int initialIndex;
 
@@ -67,27 +85,112 @@ class _HalamanUserState extends State<HalamanUser> {
 /// ======================
 /// BERANDA (FITUR UTAMA)
 /// ======================
-class _BerandaSection extends StatelessWidget {
+class _BerandaSection extends StatefulWidget {
   const _BerandaSection();
 
   @override
+  State<_BerandaSection> createState() => _BerandaSectionState();
+}
+
+class _BerandaSectionState extends State<_BerandaSection> {
+  HomeFilter _filter = HomeFilter.semua;
+
+  void _openFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        HomeFilter temp = _filter;
+
+        return StatefulBuilder(
+          builder: (ctx, setModal) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tampilkan di Beranda',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 10,
+                    children: HomeFilter.values.map((f) {
+                      final selected = temp == f;
+                      return ChoiceChip(
+                        label: Text(f.label),
+                        selected: selected,
+                        onSelected: (_) => setModal(() => temp = f),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFAA2B),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () {
+                        setState(() => _filter = temp);
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        'Terapkan',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final showLayanan =
+        _filter == HomeFilter.semua || _filter == HomeFilter.layanan;
+    final showJadwal =
+        _filter == HomeFilter.semua || _filter == HomeFilter.jadwal;
+
     return Container(
       color: const Color(0xFFF5F5F7),
       child: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _HeaderBeranda(),
-            SizedBox(height: 16),
-            _SectionKategoriLayanan(),
-            SizedBox(height: 16),
-            _SectionMedicalCheckup(),
-            SizedBox(height: 20),
-            _SectionLayananLain(),
-            SizedBox(height: 16),
-            _SectionJadwal(),
+          children: [
+            _HeaderBeranda(
+              activeFilter: _filter,
+              onTapFilter: _openFilterSheet,
+            ),
+
+            if (showLayanan) ...const [
+              SizedBox(height: 16),
+              _SectionKategoriLayanan(),
+              SizedBox(height: 16),
+              _SectionMedicalCheckup(),
+              SizedBox(height: 20),
+              _SectionLayananLain(),
+            ],
+
+            if (showJadwal) ...const [
+              SizedBox(height: 16),
+              _SectionJadwal(),
+            ],
           ],
         ),
       ),
@@ -97,7 +200,13 @@ class _BerandaSection extends StatelessWidget {
 
 /// HEADER: ungu + search bar + alamat expandable
 class _HeaderBeranda extends StatefulWidget {
-  const _HeaderBeranda();
+  final HomeFilter activeFilter;
+  final VoidCallback onTapFilter;
+
+  const _HeaderBeranda({
+    required this.activeFilter,
+    required this.onTapFilter,
+  });
 
   @override
   State<_HeaderBeranda> createState() => _HeaderBerandaState();
@@ -155,7 +264,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
         name ??= data['name'] as String?;
         final alamatDb = data['alamat'];
         if (alamatDb != null && (alamatDb as String).isNotEmpty) {
-          address ??= alamatDb as String;
+          address ??= alamatDb;
         }
       }
 
@@ -184,9 +293,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
   Widget build(BuildContext context) {
     final displayName = _loadingUser
         ? '...'
-        : (_userName != null && _userName!.isNotEmpty
-            ? _userName!
-            : 'Pengguna');
+        : (_userName != null && _userName!.isNotEmpty ? _userName! : 'Pengguna');
 
     final fullAddress = _loadingUser
         ? 'Memuat alamat...'
@@ -317,9 +424,7 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const _SearchPage(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const _SearchPage()),
                       );
                     },
                     child: Container(
@@ -357,17 +462,23 @@ class _HeaderBerandaState extends State<_HeaderBeranda> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Container(
-                  height: 44,
-                  width: 44,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFFAA2B),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.tune_rounded,
-                    color: Colors.white,
-                    size: 22,
+
+                // tombol tune: buka bottomsheet filter beranda
+                InkWell(
+                  borderRadius: BorderRadius.circular(999),
+                  onTap: widget.onTapFilter,
+                  child: Container(
+                    height: 44,
+                    width: 44,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFAA2B),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.tune_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
               ],
@@ -448,16 +559,12 @@ class _KategoriCard extends StatelessWidget {
           if (isEmergency) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const SadarMencariLokasi(),
-              ),
+              MaterialPageRoute(builder: (_) => const SadarMencariLokasi()),
             );
           } else {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const PilihKendaraanPage(),
-              ),
+              MaterialPageRoute(builder: (_) => const PilihKendaraanPage()),
             );
           }
         },
@@ -526,7 +633,14 @@ class _SectionMedicalCheckup extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PilihKendaraanPage(),
+                        ),
+                      );
+                    },
                     child: const Text(
                       'Pesan Sekarang!',
                       style: TextStyle(
@@ -587,9 +701,7 @@ class _SectionLayananLain extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const SajadHomePage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const SajadHomePage()),
                     );
                   },
                   child: Column(
@@ -626,9 +738,15 @@ class _SectionLayananLain extends StatelessWidget {
                   Navigator.of(context).pushNamed('/salacak');
                 },
               ),
-              const _LayananLainItem(
+              _LayananLainItem(
                 label: 'Lainnya',
                 assetPath: 'assets/images/ic_lainnya.png',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const _SearchPage()),
+                  );
+                },
               ),
             ],
           ),
@@ -729,9 +847,7 @@ class _SectionJadwal extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const JadwalPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const JadwalPage()),
                   );
                 },
                 child: const Text(
@@ -903,8 +1019,7 @@ class _PlaceholderSection extends StatelessWidget {
           children: [
             Text(
               title,
-              style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -936,7 +1051,6 @@ class _CustomBottomNavBar extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // background ungu
           Positioned(
             left: 0,
             right: 0,
@@ -1015,12 +1129,9 @@ class _BottomBarItem extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (index == 3) {
-          // tab Profil → buka halaman Profile
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const ProfilePage(),
-            ),
+            MaterialPageRoute(builder: (_) => const ProfilePage()),
           );
         } else {
           onTap(index);
@@ -1085,7 +1196,7 @@ class _BottomBarItem extends StatelessWidget {
 /// HALAMAN PENCARIAN
 /// ======================
 class _SearchPage extends StatefulWidget {
-  const _SearchPage({super.key});
+  const _SearchPage();
 
   @override
   State<_SearchPage> createState() => _SearchPageState();
@@ -1102,9 +1213,7 @@ class _SearchPageState extends State<_SearchPage> {
           onTap: (context) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const PilihKendaraanPage(),
-              ),
+              MaterialPageRoute(builder: (_) => const PilihKendaraanPage()),
             );
           },
         ),
@@ -1115,9 +1224,7 @@ class _SearchPageState extends State<_SearchPage> {
           onTap: (context) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const SadarMencariLokasi(),
-              ),
+              MaterialPageRoute(builder: (_) => const SadarMencariLokasi()),
             );
           },
         ),
@@ -1128,9 +1235,7 @@ class _SearchPageState extends State<_SearchPage> {
           onTap: (context) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const SajadHomePage(),
-              ),
+              MaterialPageRoute(builder: (_) => const SajadHomePage()),
             );
           },
         ),
@@ -1141,9 +1246,7 @@ class _SearchPageState extends State<_SearchPage> {
           onTap: (context) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const RiwayatPage(),
-              ),
+              MaterialPageRoute(builder: (_) => const RiwayatPage()),
             );
           },
         ),
@@ -1162,9 +1265,7 @@ class _SearchPageState extends State<_SearchPage> {
           onTap: (context) {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (_) => const ChatPages(),
-              ),
+              MaterialPageRoute(builder: (_) => const ChatPages()),
             );
           },
         ),

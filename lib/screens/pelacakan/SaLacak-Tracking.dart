@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:sahabat_rs/models/lacak_pendampingan.dart';
 import 'package:sahabat_rs/services/salacak_service.dart';
-// ⬇️ IMPORT halaman selesai pengantaran
 import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pengantaran_selesai.dart';
 
 /// HALAMAN Tracking SaLacak
@@ -10,9 +9,13 @@ import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pengantaran_selesai
 class SaLacakTrackingPage extends StatelessWidget {
   final int? idRiwayatPesanan;
 
+  /// ✅ waktu saat tombol ditekan (biar tanggal dummy sesuai realtime saat klik)
+  final DateTime? pressedAt;
+
   const SaLacakTrackingPage({
     super.key,
     this.idRiwayatPesanan,
+    this.pressedAt,
   });
 
   @override
@@ -39,8 +42,7 @@ class SaLacakTrackingPage extends StatelessWidget {
             children: [
               // HEADER + tombol back
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   children: [
                     Material(
@@ -54,8 +56,7 @@ class SaLacakTrackingPage extends StatelessWidget {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const SadarPengantaranSelesai(),
+                              builder: (_) => const SadarPengantaranSelesai(),
                             ),
                           );
                         },
@@ -64,8 +65,7 @@ class SaLacakTrackingPage extends StatelessWidget {
                     const SizedBox(width: 12),
                     const Text(
                       "Lacak Pendamping",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -77,8 +77,7 @@ class SaLacakTrackingPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
@@ -146,10 +145,8 @@ class SaLacakTrackingPage extends StatelessWidget {
                           child: FutureBuilder<List<LacakPendampingan>>(
                             future: futureTimeline,
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(child: CircularProgressIndicator());
                               }
 
                               final list = snapshot.data ?? [];
@@ -167,8 +164,7 @@ class SaLacakTrackingPage extends StatelessWidget {
                               }
 
                               // Urutkan dari yang terbaru ke paling lama
-                              list.sort(
-                                  (a, b) => b.waktu.compareTo(a.waktu));
+                              list.sort((a, b) => b.waktu.compareTo(a.waktu));
 
                               return ListView.builder(
                                 itemCount: list.length,
@@ -198,9 +194,12 @@ class SaLacakTrackingPage extends StatelessWidget {
     );
   }
 
-  /// Data dummy supaya UI sama persis contoh ketika DB belum ada data
+  /// ✅ Data dummy supaya UI sama persis contoh ketika DB belum ada data
+  /// ✅ Tanggal menyesuaikan waktu saat tombol dipencet (pressedAt)
   List<LacakPendampingan> _dummyTimeline() {
-    final tanggal = DateTime(2025, 7, 27);
+    final base = pressedAt ?? DateTime.now();
+    final tanggal = DateTime(base.year, base.month, base.day);
+
     DateTime t(int hh, int mm) =>
         DateTime(tanggal.year, tanggal.month, tanggal.day, hh, mm);
 
@@ -310,8 +309,7 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tanggalLabel =
-        DateFormat("dd MMM\nHH:mm", "id_ID").format(data.waktu);
+    final tanggalLabel = DateFormat("dd MMM\nHH:mm", "id_ID").format(data.waktu);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,6 +326,7 @@ class _TimelineRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
+
         // bullet + garis
         Column(
           children: [
@@ -348,6 +347,7 @@ class _TimelineRow extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 12),
+
         // deskripsi aktivitas
         Expanded(
           child: Padding(
