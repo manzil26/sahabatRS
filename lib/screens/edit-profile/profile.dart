@@ -1,17 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
-import 'package:iconify_flutter/icons/mdi.dart';
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:sahabat_rs/screens/main-features/halaman-user.dart';
 import 'package:sahabat_rs/screens/edit-profile/edit.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  // Variabel untuk menampung data profil
+  Map<String, dynamic>? _profileData;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserProfile();
+  }
+
+  // Fungsi mengambil data dari tabel 'pengguna'
+  Future<void> _fetchUserProfile() async {
+    try {
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) return;
+
+      final data = await Supabase.instance.client
+          .from('pengguna')
+          .select()
+          .eq('id_pengguna', userId)
+          .maybeSingle();
+
+      if (mounted) {
+        setState(() {
+          _profileData = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetch profile: $e");
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Fallback jika data masih loading atau kosong
+    final String displayName = _profileData?['name'] ?? "Pengguna";
+    final String displayPhone = _profileData?['nomor_telepon'] ?? "-";
+
     return Scaffold(
-      // body pakai gradient kuning bergradasi (atas pekat -> bawah pucat/putih)
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -26,121 +66,143 @@ class ProfilePage extends StatelessWidget {
             stops: [0.0, 0.45, 0.8, 1.0],
           ),
         ),
-        child: Column(
-          children: [
-            const SizedBox(height: 50),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  const SizedBox(height: 50),
 
-            // ================= AVATAR + NAMA =================
-            Column(
-              children: [
-                Container(
-                  width: 144,
-                  height: 144,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  padding: const EdgeInsets.all(0.7),
-                  child: ClipOval(
-                    child: Image.asset(
-                      "assets/images/user.png",
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "Lastri",
-                  style: TextStyle(
-                    fontFamily: "Rubik",
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            // ================= KOTAK MENU PUTIH =================
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 18,
-                ),
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    menuItem(
-                      iconAsset: "assets/images/profil.png",
-                      text: "Edit Profil",
-                      bgColor: const Color(0xFF5966B1).withOpacity(0.4),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const EditProfilePage(),
+                  // ================= AVATAR + NAMA =================
+                  Column(
+                    children: [
+                      Container(
+                        width: 144,
+                        height: 144,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: ClipOval(
+                          // TODO: Bisa integrasi storage untuk foto asli
+                          child: Image.asset(
+                            "assets/images/user.png",
+                            fit: BoxFit.cover,
                           ),
-                        );
-                      },
-                    ),
-                    menuItem(
-                      iconAsset: "assets/images/notifikasi.png",
-                      text: "Notifikasi",
-                      bgColor: const Color(0xFFF6A230).withOpacity(0.4),
-                    ),
-                    menuItem(
-                      iconAsset: "assets/images/asuransi.png",
-                      text: "Asuransi",
-                      bgColor: const Color(0xFF5966B1).withOpacity(0.4),
-                    ),
-                    menuItem(
-                      iconAsset: "assets/images/keluarga.png",
-                      text: "Keluarga",
-                      bgColor: const Color(0xFFF6A230).withOpacity(0.4),
-                    ),
-                    menuItem(
-                      iconAsset: "assets/images/pengaturan.png",
-                      text: "Pengaturan",
-                      bgColor: const Color(0xFF5966B1).withOpacity(0.4),
-                    ),
-                    const Divider(height: 28),
-                    menuItem(
-                      iconAsset: "assets/images/keluar.png",
-                      text: "Keluar",
-                      bgColor: Colors.grey.shade300,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        displayName,
+                        style: const TextStyle(
+                          fontFamily: "Rubik",
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        displayPhone,
+                        style: TextStyle(
+                          fontFamily: "Rubik",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black87.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
 
-      // bottom nav share style
+                  const SizedBox(height: 20),
+
+                  // ================= KOTAK MENU PUTIH =================
+                  Expanded(
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(28),
+                          topRight: Radius.circular(28),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        children: [
+                          menuItem(
+                            iconAsset: "assets/images/profil.png",
+                            text: "Edit Profil",
+                            bgColor: const Color(0xFF5966B1).withOpacity(0.4),
+                            onTap: () async {
+                              // Navigasi ke Edit dan tunggu hasil (refresh saat kembali)
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const EditProfilePage(),
+                                ),
+                              );
+                              // Refresh data setelah edit
+                              _fetchUserProfile();
+                            },
+                          ),
+                          menuItem(
+                            iconAsset: "assets/images/notifikasi.png",
+                            text: "Notifikasi",
+                            bgColor: const Color(0xFFF6A230).withOpacity(0.4),
+                          ),
+                          menuItem(
+                            iconAsset: "assets/images/asuransi.png",
+                            text: "Asuransi",
+                            bgColor: const Color(0xFF5966B1).withOpacity(0.4),
+                          ),
+                          menuItem(
+                            iconAsset: "assets/images/keluarga.png",
+                            text: "Keluarga",
+                            bgColor: const Color(0xFFF6A230).withOpacity(0.4),
+                            onTap: () {
+                              Navigator.of(context).pushNamed('/salacak');
+                            },
+                          ),
+                          menuItem(
+                            iconAsset: "assets/images/pengaturan.png",
+                            text: "Pengaturan",
+                            bgColor: const Color(0xFF5966B1).withOpacity(0.4),
+                          ),
+                          const Divider(height: 28),
+                          menuItem(
+                            iconAsset: "assets/images/keluar.png",
+                            text: "Keluar",
+                            bgColor: Colors.grey.shade300,
+                            onTap: () async {
+                              await Supabase.instance.client.auth.signOut();
+                              if (context.mounted) {
+                                Navigator.of(context)
+                                    .pushReplacementNamed('/login');
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
       bottomNavigationBar: const _ProfileBottomNavBar(),
     );
   }
 
-  // ================= WIDGET MENU ITEM =================
   Widget menuItem({
     required String iconAsset,
     required String text,
@@ -148,32 +210,32 @@ class ProfilePage extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: ListTile(
         onTap: onTap,
         contentPadding: EdgeInsets.zero,
         leading: Container(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: bgColor,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           alignment: Alignment.center,
           child: Image.asset(
             iconAsset,
-            width: 22,
-            height: 22,
+            width: 24,
+            height: 24,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.circle, size: 10),
           ),
         ),
         title: Text(
           text,
           style: const TextStyle(
             fontFamily: "Rubik",
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -183,7 +245,7 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-// ================= BOTTOM NAV UNTUK PROFILE =================
+// ================= BOTTOM NAV (Sama seperti sebelumnya) =================
 class _ProfileBottomNavBar extends StatelessWidget {
   const _ProfileBottomNavBar();
 
@@ -215,25 +277,13 @@ class _ProfileBottomNavBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
                   _ProfileNavItem(
-                    index: 0,
-                    icon: Icons.home_filled,
-                    label: 'Beranda',
-                  ),
+                      index: 0, icon: Icons.home_filled, label: 'Beranda'),
                   _ProfileNavItem(
-                    index: 1,
-                    icon: Icons.history,
-                    label: 'Riwayat',
-                  ),
+                      index: 1, icon: Icons.history, label: 'Riwayat'),
                   _ProfileNavItem(
-                    index: 2,
-                    icon: Icons.message,
-                    label: 'Pesan',
-                  ),
+                      index: 2, icon: Icons.message, label: 'Pesan'),
                   _ProfileNavItem(
-                    index: 3,
-                    icon: Icons.person,
-                    label: 'Profil',
-                  ),
+                      index: 3, icon: Icons.person, label: 'Profil'),
                 ],
               ),
             ),
@@ -250,7 +300,6 @@ class _ProfileNavItem extends StatelessWidget {
   final String label;
 
   const _ProfileNavItem({
-    super.key,
     required this.index,
     required this.icon,
     required this.label,
@@ -264,11 +313,7 @@ class _ProfileNavItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        if (index == currentIndex) {
-          // sudah di Profil
-          return;
-        }
-        // 0/1/2 => balik ke HalamanUser dengan tab sesuai
+        if (index == currentIndex) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -281,8 +326,8 @@ class _ProfileNavItem extends StatelessWidget {
         width: 70,
         height: 70,
         child: Stack(
-          clipBehavior: Clip.none,
           alignment: Alignment.center,
+          clipBehavior: Clip.none,
           children: [
             Positioned(
               top: selected ? -12 : 10,
@@ -290,28 +335,16 @@ class _ProfileNavItem extends StatelessWidget {
                   ? Container(
                       width: 40,
                       height: 40,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
                       padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                          color: Colors.white, shape: BoxShape.circle),
                       child: Container(
                         decoration: const BoxDecoration(
-                          color: orange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          icon,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                            color: orange, shape: BoxShape.circle),
+                        child: Icon(icon, color: Colors.white, size: 22),
                       ),
                     )
-                  : Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                  : Icon(icon, color: Colors.white, size: 24),
             ),
             Positioned(
               bottom: 8,
