@@ -1,3 +1,4 @@
+import 'jemput.dart';
 import 'package:flutter/material.dart';
 // PERBAIKAN: Sesuaikan nama file dengan yang ada di folder (snake_case)
 import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pemesanan.dart';
@@ -54,11 +55,11 @@ class PilihKendaraanPage extends StatelessWidget {
               bgColor: const Color(0xFF7986CB),
               textColor: Colors.white,
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SadarPemesan()),
-                );
-              },
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const JemputPage()),
+              );
+            },
             ),
 
             const SizedBox(height: 24),
@@ -69,10 +70,10 @@ class PilihKendaraanPage extends StatelessWidget {
               imagePath: "assets/images/motor.png",
               bgColor: const Color(0xFFFDD835),
               textColor: Colors.brown[800]!,
-              onTap: () {
+                onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SadarPemesan()),
+                  MaterialPageRoute(builder: (context) => const JemputPage()),
                 );
               },
             ),
