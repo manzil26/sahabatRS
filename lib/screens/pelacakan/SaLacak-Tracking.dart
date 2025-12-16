@@ -1,29 +1,201 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'package:sahabat_rs/models/lacak_pendampingan.dart';
 import 'package:sahabat_rs/services/salacak_service.dart';
-// ⬇️ IMPORT halaman selesai pengantaran
 import 'package:sahabat_rs/screens/pengantaran-darurat/sadar_pengantaran_selesai.dart';
 
 /// HALAMAN Tracking SaLacak
-/// - Dipanggil ketika tekan "Lacak Pendampingan"
-class SaLacakTrackingPage extends StatelessWidget {
+/// - Jika idRiwayatPesanan != null -> ambil timeline dari DB (polling tiap 5 detik)
+/// - Jika idRiwayatPesanan == null -> simulasi realtime (muncul bertahap tiap beberapa detik)
+class SaLacakTrackingPage extends StatefulWidget {
   final int? idRiwayatPesanan;
+
+  /// waktu saat tombol ditekan (biar simulasi realtime & tanggal sesuai saat klik)
+  final DateTime? pressedAt;
 
   const SaLacakTrackingPage({
     super.key,
     this.idRiwayatPesanan,
+    this.pressedAt,
   });
 
   @override
+  State<SaLacakTrackingPage> createState() => _SaLacakTrackingPageState();
+}
+
+class _SaLacakTrackingPageState extends State<SaLacakTrackingPage> {
+  bool _loading = true;
+  String? _error;
+
+  // timeline dari DB (kalau ada idRiwayatPesanan)
+  List<LacakPendampingan> _dbTimeline = [];
+
+  // waktu "sekarang" untuk simulasi realtime
+  DateTime _now = DateTime.now();
+  Timer? _tickTimer;
+  Timer? _pollTimer;
+
+  late final DateTime _pressedAt;
+
+  @override
+  void initState() {
+    super.initState();
+    _pressedAt = widget.pressedAt ?? DateTime.now();
+
+    // update waktu tiap 1 detik (biar simulasi realtime jalan tanpa refresh)
+    _tickTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() => _now = DateTime.now());
+    });
+
+    _loadTimeline();
+
+    // kalau pakai DB, polling biar “realtime”
+    if (widget.idRiwayatPesanan != null) {
+      _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+        _loadTimeline(silent: true);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tickTimer?.cancel();
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadTimeline({bool silent = false}) async {
+    try {
+      if (!silent) {
+        setState(() {
+          _loading = true;
+          _error = null;
+        });
+      }
+
+      if (widget.idRiwayatPesanan == null) {
+        // mode simulasi -> tidak fetch DB
+        if (!mounted) return;
+        setState(() {
+          _dbTimeline = [];
+          _loading = false;
+        });
+        return;
+      }
+
+      final fetched =
+          await SaLacakService.getPelacakan(widget.idRiwayatPesanan!);
+      fetched.sort((a, b) => b.waktu.compareTo(a.waktu));
+
+      if (!mounted) return;
+      setState(() {
+        _dbTimeline = fetched;
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = 'Gagal memuat pelacakan: $e';
+      });
+    }
+  }
+
+  /// SIMULASI REALTIME (tanpa pendamping app):
+  /// item akan "muncul" bertahap sesuai detik dari pressedAt
+  List<LacakPendampingan> _simulatedTimelineVisible() {
+    final base = _pressedAt;
+
+    DateTime atSeconds(int s) => base.add(Duration(seconds: s));
+
+    // Muncul cepat: total 15 detik
+    final all = <LacakPendampingan>[
+      LacakPendampingan(
+        idPelacakan: 1,
+        idRiwayatPesanan: 1,
+        aktivitas: "Penjemputan pasien",
+        status: "dijemput",
+        waktu: atSeconds(0),
+      ),
+      LacakPendampingan(
+        idPelacakan: 2,
+        idRiwayatPesanan: 1,
+        aktivitas: "Tiba di Rumah Sakit",
+        status: "di_rs",
+        waktu: atSeconds(3),
+      ),
+      LacakPendampingan(
+        idPelacakan: 3,
+        idRiwayatPesanan: 1,
+        aktivitas: "Administrasi pendaftaran selesai",
+        status: "di_rs",
+        waktu: atSeconds(6),
+      ),
+      LacakPendampingan(
+        idPelacakan: 4,
+        idRiwayatPesanan: 1,
+        aktivitas: "Medical Check-Up pada poli mata selesai",
+        status: "di_rs",
+        waktu: atSeconds(9),
+      ),
+      LacakPendampingan(
+        idPelacakan: 5,
+        idRiwayatPesanan: 1,
+        aktivitas: "Pengambilan obat selesai",
+        status: "di_rs",
+        waktu: atSeconds(12),
+      ),
+      LacakPendampingan(
+        idPelacakan: 6,
+        idRiwayatPesanan: 1,
+        aktivitas: "Pasien telah kembali ke rumah",
+        status: "selesai",
+        waktu: atSeconds(15),
+      ),
+    ];
+
+    // tampilkan hanya yang waktunya sudah lewat (biar berasa realtime)
+    final visible = all.where((x) => !x.waktu.isAfter(_now)).toList();
+    visible.sort((a, b) => b.waktu.compareTo(a.waktu));
+    return visible;
+  }
+
+  _StepState _deriveStepState(List<LacakPendampingan> timeline) {
+    if (timeline.isEmpty) {
+      return const _StepState(
+        penjemputan: true,
+        rs: false,
+        pengantaran: false,
+      );
+    }
+
+    final latest = timeline.first;
+    final s = latest.status.toLowerCase();
+
+    if (s.contains('selesai')) {
+      return const _StepState(penjemputan: true, rs: true, pengantaran: true);
+    }
+    if (s.contains('di_rs') || s.contains('rs')) {
+      return const _StepState(penjemputan: true, rs: true, pengantaran: false);
+    }
+    if (s.contains('dijemput') || s.contains('jemput')) {
+      return const _StepState(penjemputan: true, rs: false, pengantaran: false);
+    }
+
+    return const _StepState(penjemputan: true, rs: true, pengantaran: false);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // NOTE:
-    // - Kalau idRiwayatPesanan == null → pakai dummy agar UI tetap tampil
-    // - Kalau dikirim (mis. dari riwayat) → ambil dari Supabase
-    final Future<List<LacakPendampingan>> futureTimeline =
-        idRiwayatPesanan == null
-            ? Future.value(_dummyTimeline())
-            : SaLacakService.getPelacakan(idRiwayatPesanan!);
+    final timeline = widget.idRiwayatPesanan == null
+        ? _simulatedTimelineVisible()
+        : _dbTimeline;
+
+    final steps = _deriveStepState(timeline);
 
     return Scaffold(
       body: Container(
@@ -37,7 +209,7 @@ class SaLacakTrackingPage extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // HEADER + tombol back
+              // HEADER
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -50,12 +222,10 @@ class SaLacakTrackingPage extends StatelessWidget {
                       child: IconButton(
                         icon: const Icon(Icons.arrow_back_ios_new_rounded),
                         onPressed: () {
-                          // ⬇️ SELALU ke halaman SadarPengantaranSelesai
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) =>
-                                  const SadarPengantaranSelesai(),
+                              builder: (_) => const SadarPengantaranSelesai(),
                             ),
                           );
                         },
@@ -73,7 +243,7 @@ class SaLacakTrackingPage extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // CARD step proses (Penjemputan - RS - Pengantaran)
+              // CARD STEP (sesuai mockup)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -92,20 +262,20 @@ class SaLacakTrackingPage extends StatelessWidget {
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       _StepItem(
                         label: "Penjemputan\nPasien",
-                        active: true,
+                        active: steps.penjemputan,
                       ),
-                      _StepConnector(),
+                      const _StepConnector(),
                       _StepItem(
                         label: "Rumah\nSakit",
-                        active: true,
+                        active: steps.rs,
                       ),
-                      _StepConnector(),
+                      const _StepConnector(),
                       _StepItem(
                         label: "Pengantaran\nPasien",
-                        active: true,
+                        active: steps.pengantaran,
                       ),
                     ],
                   ),
@@ -114,7 +284,7 @@ class SaLacakTrackingPage extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // CARD timeline
+              // CARD TIMELINE
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -142,50 +312,52 @@ class SaLacakTrackingPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Expanded(
-                          child: FutureBuilder<List<LacakPendampingan>>(
-                            future: futureTimeline,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
 
-                              final list = snapshot.data ?? [];
+                        if (_loading)
+                          const Expanded(
+                            child: Center(child: CircularProgressIndicator()),
+                          )
+                        else if (_error != null)
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                _error!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ),
+                          )
+                        else if (timeline.isEmpty)
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                widget.idRiwayatPesanan == null
+                                    ? "Menunggu proses berjalan..."
+                                    : "Belum ada update pendampingan.",
+                                style: const TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: timeline.length,
+                              itemBuilder: (context, index) {
+                                final item = timeline[index];
+                                final isFirst = index == 0;
+                                final isLast = index == timeline.length - 1;
 
-                              if (list.isEmpty) {
-                                return const Center(
-                                  child: Text(
-                                    "Belum ada update pendampingan.",
-                                    style: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                                return _TimelineRow(
+                                  data: item,
+                                  isFirst: isFirst,
+                                  isLast: isLast,
                                 );
-                              }
-
-                              // Urutkan dari yang terbaru ke paling lama
-                              list.sort(
-                                  (a, b) => b.waktu.compareTo(a.waktu));
-
-                              return ListView.builder(
-                                itemCount: list.length,
-                                itemBuilder: (context, index) {
-                                  final item = list[index];
-                                  final isFirst = index == 0;
-                                  final isLast = index == list.length - 1;
-                                  return _TimelineRow(
-                                    data: item,
-                                    isFirst: isFirst,
-                                    isLast: isLast,
-                                  );
-                                },
-                              );
-                            },
+                              },
+                            ),
                           ),
-                        )
                       ],
                     ),
                   ),
@@ -197,58 +369,18 @@ class SaLacakTrackingPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  /// Data dummy supaya UI sama persis contoh ketika DB belum ada data
-  List<LacakPendampingan> _dummyTimeline() {
-    final tanggal = DateTime(2025, 7, 27);
-    DateTime t(int hh, int mm) =>
-        DateTime(tanggal.year, tanggal.month, tanggal.day, hh, mm);
+class _StepState {
+  final bool penjemputan;
+  final bool rs;
+  final bool pengantaran;
 
-    return [
-      LacakPendampingan(
-        idPelacakan: 1,
-        idRiwayatPesanan: 1,
-        aktivitas: "Pasien telah kembali ke rumah",
-        status: "selesai",
-        waktu: t(11, 20),
-      ),
-      LacakPendampingan(
-        idPelacakan: 2,
-        idRiwayatPesanan: 1,
-        aktivitas: "Pengambilan obat selesai",
-        status: "di_rs",
-        waktu: t(11, 00),
-      ),
-      LacakPendampingan(
-        idPelacakan: 3,
-        idRiwayatPesanan: 1,
-        aktivitas: "Medical Check-Up pada poli mata selesai",
-        status: "di_rs",
-        waktu: t(10, 45),
-      ),
-      LacakPendampingan(
-        idPelacakan: 4,
-        idRiwayatPesanan: 1,
-        aktivitas: "Administrasi pendaftaran selesai",
-        status: "di_rs",
-        waktu: t(10, 15),
-      ),
-      LacakPendampingan(
-        idPelacakan: 5,
-        idRiwayatPesanan: 1,
-        aktivitas: "Tiba di Rumah Sakit",
-        status: "di_rs",
-        waktu: t(10, 00),
-      ),
-      LacakPendampingan(
-        idPelacakan: 6,
-        idRiwayatPesanan: 1,
-        aktivitas: "Penjemputan pasien",
-        status: "dijemput",
-        waktu: t(9, 46),
-      ),
-    ];
-  }
+  const _StepState({
+    required this.penjemputan,
+    required this.rs,
+    required this.pengantaran,
+  });
 }
 
 class _StepItem extends StatelessWidget {
@@ -265,18 +397,18 @@ class _StepItem extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
-            color: active ? const Color(0xFF567DF4) : Colors.grey.shade400,
+            color: active ? const Color(0xFFFFC63A) : Colors.grey.shade300,
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 11),
+          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
         ),
       ],
     );
@@ -310,25 +442,30 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tanggalLabel =
-        DateFormat("dd MMM\nHH:mm", "id_ID").format(data.waktu);
+    final dateLabel = DateFormat("dd MMM", "id_ID").format(data.waktu);
+    final timeLabel = DateFormat("HH:mm", "id_ID").format(data.waktu);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // tanggal + jam
         SizedBox(
-          width: 60,
-          child: Text(
-            tanggalLabel,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black87,
-            ),
+          width: 62,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                dateLabel,
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                timeLabel,
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+            ],
           ),
         ),
-        const SizedBox(width: 8),
-        // bullet + garis
+        const SizedBox(width: 10),
         Column(
           children: [
             Container(
@@ -342,16 +479,15 @@ class _TimelineRow extends StatelessWidget {
             if (!isLast)
               Container(
                 width: 2,
-                height: 40,
+                height: 46,
                 color: const Color(0xFF567DF4),
               ),
           ],
         ),
         const SizedBox(width: 12),
-        // deskripsi aktivitas
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 18),
             child: Text(
               data.aktivitas,
               style: TextStyle(

@@ -180,7 +180,9 @@ class SadarKonfirmasi extends StatelessWidget {
                         Navigator.push(
                           context,
                             MaterialPageRoute(
-                              builder: (_) => const SaLacakTrackingPage(),
+                              builder: (_) => SaLacakTrackingPage(
+                                pressedAt: DateTime.now(),
+                              ),
                             ),
                           );
                       },
