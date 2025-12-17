@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'chat-sadamp.dart';
+import 'package:sahabat_rs/services/chat_service.dart';
 
 class ChatPages extends StatefulWidget {
   const ChatPages({super.key});
@@ -11,23 +13,68 @@ class ChatPages extends StatefulWidget {
 }
 
 class _ChatPagesState extends State<ChatPages> {
+  final supabase = Supabase.instance.client;
   final String _myUserId = Supabase.instance.client.auth.currentUser!.id;
 
-  // DATA DUMMY (Ghost Users) dengan Foto Profil
-  final Map<String, Map<String, String>> _dummyProfiles = {
-    '11111111-1111-1111-1111-111111111111': {
-      'name': 'Esa Anugrah',
-      'role': 'Driver Ambulance',
-      'image': 'assets/images/driver.png', // Pastikan aset ini ada
-      'is_verified': 'true'
-    },
-    '22222222-2222-2222-2222-222222222222': {
-      'name': 'Siti Aminah',
-      'role': 'Perawat Pendamping',
-      'image': 'assets/images/nurse.png', // Pastikan aset ini ada
-      'is_verified': 'false'
+  final _searchCtrl = TextEditingController();
+  Timer? _debounce;
+
+  List<Map<String, dynamic>> _searchResults = [];
+
+  /// =========================
+  /// CACHE NAMA USER
+  /// =========================
+  final Map<String, String> _userNameCache = {};
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+
+  /// =========================
+  /// AMBIL NAMA USER
+  /// =========================
+  Future<String> _getUserName(String userId) async {
+    if (_userNameCache.containsKey(userId)) {
+      return _userNameCache[userId]!;
     }
-  };
+
+    final res = await supabase
+        .from('pengguna')
+        .select('name')
+        .eq('id_pengguna', userId)
+        .single();
+
+    final name = res['name'] ?? 'Pengguna';
+    _userNameCache[userId] = name;
+    return name;
+  }
+
+  /// =========================
+  /// SEARCH USER
+  /// =========================
+  void _onSearchChanged(String keyword) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () async {
+      if (keyword.trim().isEmpty) {
+        setState(() => _searchResults = []);
+        return;
+      }
+
+      final res = await supabase
+          .from('pengguna')
+          .select('id_pengguna, name, email')
+          .or('name.ilike.%$keyword%,email.ilike.%$keyword%')
+          .neq('id_pengguna', _myUserId)
+          .limit(20);
+
+      setState(() {
+        _searchResults = List<Map<String, dynamic>>.from(res);
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,322 +83,190 @@ class _ChatPagesState extends State<ChatPages> {
       body: SafeArea(
         child: Column(
           children: [
-            // HEADER & SEARCH
-            _buildCustomHeader(),
-
-            // LIST CHAT
+            _buildHeader(),
             Expanded(
-              child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream: Supabase.instance.client.from('chat').stream(
-                    primaryKey: ['id']).order('created_at', ascending: false),
+              child: _searchResults.isNotEmpty
+                  ? _buildSearchResults()
+                  : _buildChatList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// =========================
+  /// HASIL SEARCH USER
+  /// =========================
+  Widget _buildSearchResults() {
+    return ListView.builder(
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final user = _searchResults[index];
+
+        return ListTile(
+          leading: const CircleAvatar(
+            backgroundImage: AssetImage('assets/icons/ic_user.png'),
+          ),
+          title: Text(user['name'] ?? 'Pengguna'),
+          subtitle: Text(user['email'] ?? ''),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChatSadamp(
+                  userName: user['name'] ?? 'Pengguna',
+                  profileImage: 'assets/icons/ic_user.png',
+                  partnerId: user['id_pengguna'],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// =========================
+  /// CHAT LIST + UNREAD BADGE
+  /// =========================
+  Widget _buildChatList() {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: ChatService.streamMessagesForUser(_myUserId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final messages = snapshot.data!;
+        if (messages.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        final Map<String, Map<String, dynamic>> lastMessage = {};
+        final Map<String, int> unreadCount = {};
+
+        for (var msg in messages) {
+          final partnerId = msg['sender_id'] == _myUserId
+              ? msg['receiver_id']
+              : msg['sender_id'];
+
+          // simpan pesan terakhir
+          lastMessage.putIfAbsent(partnerId, () => msg);
+
+          // hitung unread
+          if (msg['receiver_id'] == _myUserId && msg['is_read'] == false) {
+            unreadCount[partnerId] = (unreadCount[partnerId] ?? 0) + 1;
+          }
+        }
+
+        return ListView(
+          children: lastMessage.entries.map((entry) {
+            final partnerId = entry.key;
+            final msg = entry.value;
+            final unread = unreadCount[partnerId] ?? 0;
+
+            final time = DateFormat('HH:mm')
+                .format(DateTime.parse(msg['created_at']).toLocal());
+
+            return ListTile(
+              leading: const CircleAvatar(
+                backgroundImage: AssetImage('assets/icons/ic_user.png'),
+              ),
+              title: FutureBuilder<String>(
+                future: _getUserName(partnerId),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text("Error: ${snapshot.error}"));
-                  }
-
-                  final allMessages = snapshot.data ?? [];
-
-                  // Filter pesan milik saya
-                  final myMessages = allMessages.where((msg) {
-                    return msg['sender_id'] == _myUserId ||
-                        msg['receiver_id'] == _myUserId;
-                  }).toList();
-
-                  if (myMessages.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  // Grouping pesan terakhir per user
-                  final Map<String, Map<String, dynamic>> lastMessagePerUser =
-                      {};
-
-                  for (var msg in myMessages) {
-                    final isMeSender = msg['sender_id'] == _myUserId;
-                    final partnerId =
-                        isMeSender ? msg['receiver_id'] : msg['sender_id'];
-
-                    if (!lastMessagePerUser.containsKey(partnerId)) {
-                      lastMessagePerUser[partnerId] = {
-                        'partner_id': partnerId,
-                        'last_message': msg['message'] ?? '',
-                        'created_at': msg['created_at'],
-                        'unread_count': 0,
-                      };
-                    }
-
-                    if (msg['receiver_id'] == _myUserId &&
-                        (msg['is_read'] == false || msg['is_read'] == null)) {
-                      lastMessagePerUser[partnerId]!['unread_count'] += 1;
-                    }
-                  }
-
-                  final conversationList = lastMessagePerUser.values.toList();
-
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    itemCount: conversationList.length,
-                    itemBuilder: (context, index) {
-                      return _buildChatItem(context, conversationList[index]);
-                    },
+                  return Text(
+                    snapshot.data ?? 'Pengguna',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   );
                 },
               ),
-            ),
-          ],
-        ),
-      ),
+              subtitle: Text(
+                msg['message'],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(time, style: const TextStyle(fontSize: 12)),
+                  if (unread > 0) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        unread.toString(),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatSadamp(
+                      userName: _userNameCache[partnerId] ?? 'Pengguna',
+                      profileImage: 'assets/icons/ic_user.png',
+                      partnerId: partnerId,
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
-  Widget _buildCustomHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-      color: Colors.white,
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Chat',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.black,
-                ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.help_outline_rounded,
-                        size: 20, color: Colors.black54),
-                  ),
-                  const SizedBox(width: 12),
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    padding: const EdgeInsets.all(6),
-                    child: const Icon(Icons.mail_outline_rounded,
-                        size: 20, color: Colors.black54),
-                  ),
-                ],
-              )
-            ],
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Chat',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F6FA),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: const [
-                      Icon(Icons.search, color: Colors.grey),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Cari',
-                            border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _searchCtrl,
+            onChanged: _onSearchChanged,
+            decoration: InputDecoration(
+              hintText: 'Cari nama atau email',
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: const Color(0xFFF5F6FA),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide.none,
               ),
-              const SizedBox(width: 12),
-              Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFBCF41),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Icon(Icons.tune_rounded, color: Colors.black87),
-              ),
-            ],
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildChatItem(BuildContext context, Map<String, dynamic> chat) {
-    final date = DateTime.parse(chat['created_at']);
-    final timeStr = DateFormat('HH:mm').format(date.toLocal());
-    final unreadCount = chat['unread_count'] as int;
-    final partnerId = chat['partner_id'] as String;
-
-    String displayName = 'Pengguna';
-    String displayImage = 'assets/icons/ic_user.png'; // Default
-    bool isVerified = false;
-
-    // Logika Avatar: Cek apakah user dummy atau user biasa
-    if (_dummyProfiles.containsKey(partnerId)) {
-      final profile = _dummyProfiles[partnerId]!;
-      displayName = profile['name']!;
-      displayImage = profile['image']!;
-      isVerified = profile['is_verified'] == 'true';
-    }
-
-    return InkWell(
-      onTap: () async {
-        await Supabase.instance.client
-            .from('chat')
-            .update({'is_read': true})
-            .eq('sender_id', partnerId)
-            .eq('receiver_id', _myUserId);
-
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ChatSadamp(
-                userName: displayName,
-                profileImage: displayImage, // Kirim foto profil ke detail chat
-                partnerId: partnerId,
-              ),
-            ),
-          );
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        child: Row(
-          children: [
-            // FOTO PROFIL (AVATAR)
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: Colors.grey[200],
-              backgroundImage: AssetImage(displayImage),
-              onBackgroundImageError: (_, __) {},
-              child: displayImage.contains('assets')
-                  ? null
-                  : const Icon(Icons.person, color: Colors.grey),
-            ),
-            const SizedBox(width: 16),
-
-            // NAMA & PREVIEW
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      // Jika bukan dummy user, coba ambil nama dari database
-                      if (!_dummyProfiles.containsKey(partnerId))
-                        FutureBuilder(
-                          future: Supabase.instance.client
-                              .from('profiles')
-                              .select('full_name')
-                              .eq('id', partnerId)
-                              .maybeSingle(),
-                          builder: (context, snap) {
-                            final name = (snap.data != null &&
-                                    snap.data!['full_name'] != null)
-                                ? snap.data!['full_name']
-                                : 'Pengguna';
-                            // Hack: update lokal var agar navigasi berikutnya benar
-                            displayName = name;
-                            return Text(name,
-                                style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold));
-                          },
-                        )
-                      else
-                        Text(
-                          displayName,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-
-                      if (isVerified) ...[
-                        const SizedBox(width: 4),
-                        const Icon(Icons.verified,
-                            size: 16, color: Colors.blue),
-                      ]
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    chat['last_message'],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF8A959E),
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // META DATA
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  timeStr,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF8A959E),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (unreadCount > 0)
-                  Container(
-                    width: 24,
-                    height: 24,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF6A230),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      unreadCount.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.chat_bubble_outline, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          const Text("Belum ada pesan", style: TextStyle(color: Colors.grey)),
-        ],
+    return const Center(
+      child: Text(
+        'Cari pengguna untuk memulai chat',
+        style: TextStyle(color: Colors.grey),
       ),
     );
   }
