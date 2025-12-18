@@ -43,17 +43,15 @@ Project ini dibangun menggunakan teknologi modern berikut:
 ---
 
 ## 📂 Struktur Database
+<img width="2454" height="1415" alt="supabase-schema-ppvjjumolctwzrednvul (2)" src="https://github.com/user-attachments/assets/5b5652fc-9208-46c2-ba02-af25a9459fb9" />
 
-Aplikasi ini menggunakan PostgreSQL di Supabase dengan skema tabel utama sebagai berikut:
-
-| Nama Tabel | Deskripsi |
-| :--- | :--- |
-| **`profiles`** | Menyimpan data pengguna (pasien/driver), terhubung dengan Supabase Auth (relasi 1-to-1). |
-| **`bookings`** | Mencatat transaksi layanan, lokasi penjemputan, tujuan RS, status, dan biaya. |
-| **`medications`** | Menyimpan jadwal obat, dosis, dan instruksi minum obat untuk fitur pengingat. |
-| **`chat_messages`** | Menyimpan riwayat percakapan antara pengguna dan pendamping. |
-
+Detail link supabase 
+https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/schemas
+https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/tables
 ---
+## 📂 Asset 
+Untuk asset detail desain ada di figma yang dilampirkan di papernya
+
 
 ## 🚀 Cara Menjalankan Project (Installation)
 
