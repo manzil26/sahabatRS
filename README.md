@@ -50,7 +50,7 @@ https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/schemas
 https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/tables
 ---
 ## 📂 Asset 
-Untuk asset detail desain ada di figma yang dilampirkan di papernya
+🔗 **[Lihat Desain Figma SahabatRS]([https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-2&t=XdKx4AX45IYXwlxd-1](https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-3&t=ZJVZkgQB83cn7sWW-1))**
 
 
 ## 🚀 Cara Menjalankan Project (Installation)
@@ -106,7 +106,7 @@ flutter run
 
 Desain antarmuka aplikasi ini dirancang menggunakan Figma. Anda dapat melihat *High-Fidelity Prototype* kami melalui tautan di bawah ini:
 
-🔗 **[Lihat Desain Figma SahabatRS](https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-2&t=XdKx4AX45IYXwlxd-1)**
+🔗 **[Lihat Desain Figma SahabatRS]([https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-2&t=XdKx4AX45IYXwlxd-1](https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-3&t=ZJVZkgQB83cn7sWW-1))**
 
 -----
 
