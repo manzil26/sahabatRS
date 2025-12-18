@@ -101,8 +101,10 @@ class _ChatSadampState extends State<ChatSadamp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Menggunakan AppBar Custom Baru
       appBar: _buildCustomAppBar(context),
-      // 1. REVISI: Menambahkan Container dengan Gradient Background
+
+      // Container Body dengan Gradient
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -129,7 +131,7 @@ class _ChatSadampState extends State<ChatSadamp> {
 
                   final streamMessages = snapshot.data!;
 
-                  /// ✅ Tandai pesan sebagai DELIVERED (hanya pesan masuk)
+                  // Tandai pesan sebagai DELIVERED (hanya pesan masuk)
                   if (streamMessages.isNotEmpty) {
                     ChatService.markMessagesAsDelivered(
                       myId: _myUserId,
@@ -185,15 +187,107 @@ class _ChatSadampState extends State<ChatSadamp> {
     );
   }
 
-  AppBar _buildCustomAppBar(BuildContext context) {
+  /// =====================================================
+  /// CUSTOM APP BAR (NEW DESIGN)
+  /// =====================================================
+  PreferredSizeWidget _buildCustomAppBar(BuildContext context) {
+    // Definisi warna sesuai request
+    const Color mustardColor = Color(0xFFFFC107); // Oranye/Mustard
+    const Color indigoColor = Color(0xFF4A5596); // Biru Indigo
+
+    // Cek apakah image berupa URL atau Asset lokal
+    final ImageProvider imageProvider = widget.profileImage.startsWith('http')
+        ? NetworkImage(widget.profileImage)
+        : AssetImage(widget.profileImage) as ImageProvider;
+
     return AppBar(
       backgroundColor: Colors.white,
-      elevation: 1,
+      elevation: 2, // Sedikit shadow
+      shadowColor: Colors.black.withOpacity(0.2),
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        icon: const Icon(Icons.arrow_back),
+        color: mustardColor, // Icon Back Oranye
         onPressed: () => Navigator.pop(context),
       ),
-      title: Text(widget.userName, style: const TextStyle(color: Colors.black)),
+      titleSpacing: 0, // Mengurangi jarak antara panah dan foto
+      title: Row(
+        children: [
+          // Foto Profil Lingkaran
+          CircleAvatar(
+            radius: 20,
+            backgroundImage: imageProvider,
+          ),
+          const SizedBox(width: 12),
+
+          // Info User (Nama & Status)
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.userName,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Text(
+                  "Online", // Status Hardcoded sementara
+                  style: TextStyle(
+                    color: mustardColor, // Teks status Oranye
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        // Tombol 1: Telepon
+        _buildCircleActionButton(
+          icon: Icons.phone,
+          color: indigoColor,
+          onTap: () {
+            // Aksi telepon
+          },
+        ),
+        const SizedBox(width: 8),
+
+        // Tombol 2: Lokasi
+        _buildCircleActionButton(
+          icon: Icons.location_on, // atau Icons.place
+          color: indigoColor,
+          onTap: () {
+            // Aksi lokasi
+          },
+        ),
+        const SizedBox(width: 16), // Padding kanan
+      ],
+    );
+  }
+
+  // Helper untuk tombol aksi bulat
+  Widget _buildCircleActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 20),
+        onPressed: onTap,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+      ),
     );
   }
 
@@ -221,26 +315,101 @@ class _ChatSadampState extends State<ChatSadamp> {
     }
   }
 
+  /// =====================================================
+  /// INPUT BAR (DESAIN KAPSUL & MIC)
+  /// =====================================================
   Widget _buildInputBar() {
+    const Color creamColor = Color(0xFFFFF7E6);
+    const Color indigoColor = Color(0xFF4A5596);
+    const Color yellowColor = Color(0xFFFFC638);
+    const Color whiteColor = Colors.white;
+
     return Container(
-      padding: const EdgeInsets.all(12),
-      color: const Color(0xFF5966B1),
+      color: creamColor,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
-                hintText: "Tulis Pesan...",
-                hintStyle: TextStyle(color: Colors.white70),
-                border: InputBorder.none,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 50),
+              decoration: BoxDecoration(
+                color: indigoColor,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.emoji_emotions_outlined),
+                    color: whiteColor,
+                    onPressed: () {},
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      style: const TextStyle(color: whiteColor),
+                      maxLines: 5,
+                      minLines: 1,
+                      decoration: InputDecoration(
+                        hintText: "Tulis Pesan...",
+                        hintStyle: TextStyle(
+                          color: whiteColor.withOpacity(0.7),
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4, vertical: 10),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.attach_file),
+                    color: whiteColor,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    color: whiteColor,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {},
+                  ),
+                  const SizedBox(width: 8),
+                ],
               ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.send, color: Colors.white),
-            onPressed: _isTyping ? _sendMessage : null,
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () {
+              if (_isTyping) {
+                _sendMessage();
+              } else {
+                // Aksi rekam
+              }
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: yellowColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  )
+                ],
+              ),
+              child: Icon(
+                _isTyping ? Icons.send : Icons.mic,
+                color: whiteColor,
+                size: 26,
+              ),
+            ),
           ),
         ],
       ),
@@ -257,7 +426,6 @@ class _ChatSadampState extends State<ChatSadamp> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          // 2. REVISI: Pengirim Biru, Penerima Putih
           color: isMe ? Colors.blue : Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -289,9 +457,6 @@ class _ChatSadampState extends State<ChatSadamp> {
     );
   }
 
-  /// =====================================================
-  /// ICON STATUS (✔ / ✔✔)
-  /// =====================================================
   Widget _buildStatusIcon(Map<String, dynamic> msg, bool isMe) {
     if (!isMe) return const SizedBox.shrink();
 
@@ -299,8 +464,6 @@ class _ChatSadampState extends State<ChatSadamp> {
     final deliveredAt = msg['delivered_at'];
 
     if (isRead) {
-      // Ubah icon centang baca menjadi Putih Terang agar terlihat di background Biru
-      // (Sebelumnya Biru, tapi Biru di atas Biru tidak akan terlihat)
       return const Icon(Icons.done_all, size: 16, color: Colors.white);
     }
 

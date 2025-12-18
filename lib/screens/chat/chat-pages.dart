@@ -230,34 +230,134 @@ class _ChatPagesState extends State<ChatPages> {
     );
   }
 
+  /// =========================
+  /// HEADER CUSTOM BARU
+  /// =========================
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Chat',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _searchCtrl,
-            onChanged: _onSearchChanged,
-            decoration: InputDecoration(
-              hintText: 'Cari nama atau email',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFF5F6FA),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 1. Top Bar: Judul Chat & Icon Aksi
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Pesan',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-            ),
+              Row(
+                children: [
+                  // Icon 1: Help (Indigo)
+                  _buildTopActionIcon(
+                    icon: Icons.help_outline,
+                    bgColor: Colors.indigo,
+                    iconColor: Colors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  // Icon 2: Email (Oranye)
+                  _buildTopActionIcon(
+                    icon: Icons.email_outlined,
+                    bgColor: Colors.orange,
+                    iconColor: Colors.white,
+                  ),
+                ],
+              )
+            ],
           ),
-        ],
+        ),
+
+        // 2. Garis Pemisah (Divider)
+        const Divider(height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+
+        // 3. Area Search & Filter + Sub Header
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  // Search Bar (Expanded Capsule)
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color:
+                            const Color(0xFFF5F6FA), // Putih Tulang / Abu Muda
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        onChanged: _onSearchChanged,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          hintText: 'Cari',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 14),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Filter Button (Mustard Circle)
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFC638), // Kuning Mustard
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.tune, color: Colors.white),
+                      onPressed: () {
+                        // Aksi filter (opsional)
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // 4. Sub-Header Pesan Masuk
+              const Text(
+                'Pesan Masuk',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper untuk membuat ikon bulat kecil di Top Bar
+  Widget _buildTopActionIcon(
+      {required IconData icon,
+      required Color bgColor,
+      required Color iconColor}) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: bgColor,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        icon,
+        color: iconColor,
+        size: 18,
       ),
     );
   }
