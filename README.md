@@ -14,7 +14,7 @@ Aplikasi ini memiliki berbagai fitur yang disesuaikan dengan kebutuhan lansia da
 
 * **Pesan Pendamping (Booking):** Memesan jasa pendamping medis untuk rawat jalan dengan pilihan moda transportasi (motor/mobil).
 * **Live Tracking:** Keluarga dapat memantau lokasi pasien dan pendamping secara *real-time* demi keamanan dan transparansi.
-* **Penjadwalan:**untuk membuat, melihat, mengedit  jadwal reminder obat dan pengantaran checkup.
+* **Penjadwalan:** untuk membuat, melihat, mengedit  jadwal reminder obat dan pengantaran checkup.
 * **Chat:** Komunikasi langsung antara pengguna/keluarga dengan pendamping (driver) di dalam aplikasi.
 * **Pengantaran darurat:** fitur ini dirancang untuk keadaan urgent seperti kecelakaan yang langsung kendaraannya mobil
 * **Pembayaran Digital:** Kemudahan transaksi *cashless* (e-wallet, transfer bank) untuk mengurangi penggunaan uang tunai.
