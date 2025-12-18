@@ -50,8 +50,21 @@ https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/schemas
 https://supabase.com/dashboard/project/ppvjjumolctwzrednvul/database/tables
 ---
 ## 📂 Asset 
+Storages avatar untuk gambar profile 
+<img width="2266" height="731" alt="image" src="https://github.com/user-attachments/assets/755c662b-49ce-4e0b-8066-88e8d96c88e4" />
+
 🔗 **[Lihat Desain Figma SahabatRS]([https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-2&t=XdKx4AX45IYXwlxd-1](https://www.figma.com/design/RSRvSbYlpjCLZefnMFbZXk/MobileApp----SahabatRS--Copy-?node-id=2-3&t=ZJVZkgQB83cn7sWW-1))**
 
+## 📂 Struktur Folder Fitur 
+<img width="599" height="1283" alt="Screenshot 2025-12-18 082125" src="https://github.com/user-attachments/assets/0c768f8f-2c88-4064-8b9d-6e1a74225693" />
+
+## 📂 Struktur Folder Fitur integrasi 
+<img width="567" height="408" alt="Screenshot 2025-12-18 083301" src="https://github.com/user-attachments/assets/1c735907-d69f-4bad-ab57-8d9c3dec821f" />
+
+## 📂 Backlog 
+<img width="2877" height="1122" alt="image" src="https://github.com/user-attachments/assets/07810cb1-cb6f-459f-9c6b-6e042e60a203" />
+
+https://github.com/users/manzil26/projects/3
 
 ## 🚀 Cara Menjalankan Project (Installation)
 
@@ -71,7 +84,7 @@ git clone https://github.com/manzil26/sahabatRS.git
 cd sahabat-rs
 ````
 
-### 3\. Instal Dependencies
+### 3. Instal Dependencies
 
 Unduh semua paket Dart yang diperlukan:
 
