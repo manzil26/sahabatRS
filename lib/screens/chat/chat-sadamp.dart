@@ -188,7 +188,7 @@ class _ChatSadampState extends State<ChatSadamp> {
   }
 
   /// =====================================================
-  /// CUSTOM APP BAR (NEW DESIGN)
+  /// BAR ATAS
   /// =====================================================
   PreferredSizeWidget _buildCustomAppBar(BuildContext context) {
     // Definisi warna sesuai request
@@ -316,7 +316,7 @@ class _ChatSadampState extends State<ChatSadamp> {
   }
 
   /// =====================================================
-  /// INPUT BAR (DESAIN KAPSUL & MIC)
+  /// INPUT BAR
   /// =====================================================
   Widget _buildInputBar() {
     const Color creamColor = Color(0xFFFFF7E6);
